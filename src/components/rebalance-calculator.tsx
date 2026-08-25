@@ -1,7 +1,7 @@
 "use client";
 
 import * as echarts from "echarts";
-import { CalendarDays, ChevronDown } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { EChart } from "@/components/echart";
@@ -9,7 +9,7 @@ import { SegmentedControl } from "@/components/segmented-control";
 import { allocateCapital, normalizeCapital } from "@/lib/allocation";
 import { ASSETS, ASSET_BY_KEY, type AssetKey } from "@/lib/assets";
 import { formatCurrency, formatDate, formatPercent } from "@/lib/format";
-import type { NavRecord, PortfolioDataset, RebalanceEventSummary } from "@/lib/types";
+import type { PortfolioDataset, RebalanceEventSummary } from "@/lib/types";
 
 type Mode = "current" | "history";
 
@@ -17,6 +17,8 @@ const MODE_OPTIONS = [
   { value: "current", label: "本期调仓" },
   { value: "history", label: "往期调仓" },
 ] as const;
+
+const HISTORY_PAGE_SIZE = 10;
 
 function emptyHoldingInputs(): Record<AssetKey, string> {
   return ASSETS.reduce(
@@ -28,32 +30,16 @@ function emptyHoldingInputs(): Record<AssetKey, string> {
   );
 }
 
-function eventLabel(event: RebalanceEventSummary): string {
-  return `${formatDate(event.executionDate)} · ${event.type} · ${event.asset}`;
-}
-
 function riskEventsForDate(events: RebalanceEventSummary[], date: string): RebalanceEventSummary[] {
   return events.filter((event) => event.executionDate <= date);
 }
 
-function snapshotForEvent(nav: NavRecord[], event: RebalanceEventSummary): NavRecord | undefined {
-  return nav.find((row) => row.date === event.executionDate);
-}
-
 export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) {
-  const availableEvents = useMemo(
-    () => [...dataset.events].reverse().filter((event) => snapshotForEvent(dataset.nav, event)),
-    [dataset.events, dataset.nav],
-  );
   const [mode, setMode] = useState<Mode>("current");
-  const [selectedEventId, setSelectedEventId] = useState(availableEvents[0]?.id ?? "");
   const [holdingInputs, setHoldingInputs] = useState<Record<AssetKey, string>>(emptyHoldingInputs);
 
-  const selectedEvent = availableEvents.find((event) => event.id === selectedEventId);
   const latest = dataset.nav.at(-1)!;
-  const snapshot = mode === "history" && selectedEvent
-    ? snapshotForEvent(dataset.nav, selectedEvent) ?? latest
-    : latest;
+  const snapshot = latest;
   const holdingAmounts = useMemo(
     () => ASSETS.reduce(
       (amounts, asset) => {
@@ -131,45 +117,18 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
 
   return (
     <div className="rebalance-page">
-      <div className="rebalance-toolbar">
+      <div className="rebalance-mode-bar">
         <SegmentedControl value={mode} options={MODE_OPTIONS} onChange={setMode} label="调仓周期" />
+        {mode === "current" && (
+          <div className="rebalance-total">
+            <span>总资金</span>
+            <strong>{formatCurrency(totalCapital)}</strong>
+          </div>
+        )}
       </div>
 
-      {mode === "history" && (
-        <div className="panel history-card mb-5 flex items-center gap-4 px-5 py-4 max-[680px]:items-stretch max-[680px]:flex-col">
-          <div className="flex items-center gap-2 text-sm font-medium">
-            <CalendarDays size={16} className="text-[var(--muted)]" />
-            <span>历史事件</span>
-          </div>
-          <div className="relative min-w-0 flex-1">
-            <select
-              value={selectedEventId}
-              onChange={(event) => setSelectedEventId(event.target.value)}
-              className="soft-input h-11 w-full appearance-none px-4 pr-9 text-sm"
-              aria-label="选择历史调仓事件"
-            >
-              {availableEvents.map((event) => (
-                <option key={event.id} value={event.id}>{eventLabel(event)}</option>
-              ))}
-            </select>
-            <ChevronDown size={15} className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-[var(--muted)]" />
-          </div>
-        </div>
-      )}
-
-      <div className="rebalance-workspace">
+      {mode === "history" ? <HistoryRebalanceTable events={dataset.events} /> : <div className="rebalance-workspace">
         <section className="panel calculator-card rebalance-calculator-panel overflow-hidden">
-          <div className="rebalance-input-summary border-b border-[var(--line)]">
-            <div>
-              <div className="text-sm font-semibold">当前持仓</div>
-              <div className="mt-1 text-xs text-[var(--muted)]">逐项填写当前持有金额，调仓建议会实时更新</div>
-            </div>
-            <div className="rebalance-total">
-              <span>总资金</span>
-              <strong>{formatCurrency(totalCapital)}</strong>
-            </div>
-          </div>
-
           <div className="rebalance-table-scroll overflow-x-auto">
             <table className="w-full min-w-[860px] border-collapse text-left">
               <thead>
@@ -270,8 +229,81 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
           </div>
           </aside>
         </div>
-      </div>
+      </div>}
     </div>
+  );
+}
+
+function HistoryRebalanceTable({ events }: { events: RebalanceEventSummary[] }) {
+  const [page, setPage] = useState(1);
+  const orderedEvents = useMemo(
+    () => [...events].sort((left, right) => {
+      const dateOrder = right.executionDate.localeCompare(left.executionDate);
+      return dateOrder || right.sequence - left.sequence;
+    }),
+    [events],
+  );
+  const totalPages = Math.max(1, Math.ceil(orderedEvents.length / HISTORY_PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const visibleEvents = orderedEvents.slice(
+    (currentPage - 1) * HISTORY_PAGE_SIZE,
+    currentPage * HISTORY_PAGE_SIZE,
+  );
+
+  return (
+    <section className="panel history-table-card overflow-hidden">
+      <div className="history-table-scroll overflow-x-auto">
+        <table className="w-full min-w-[760px] border-collapse text-left">
+          <thead>
+            <tr className="border-b border-[var(--line)] text-xs text-[var(--muted)]">
+              <th className="px-6 py-4 font-medium">执行日期</th>
+              <th className="px-5 py-4 font-medium">事件</th>
+              <th className="px-5 py-4 font-medium">资产</th>
+              <th className="px-6 py-4 font-medium">说明</th>
+            </tr>
+          </thead>
+          <tbody>
+            {visibleEvents.map((event) => (
+              <tr key={event.id} className="table-row border-b border-[var(--line)] last:border-0">
+                <td className="px-6 py-5 font-mono text-sm tabular-nums">{formatDate(event.executionDate)}</td>
+                <td className="px-5 py-5 text-sm font-semibold">{event.type}</td>
+                <td className="px-5 py-5 text-sm">{event.asset || "组合"}</td>
+                <td className="px-6 py-5 text-sm text-[var(--muted)]">{event.reason}</td>
+              </tr>
+            ))}
+            {visibleEvents.length === 0 && (
+              <tr>
+                <td colSpan={4} className="px-6 py-16 text-center text-sm text-[var(--muted)]">暂无历史调仓事件</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+      <div className="history-table-footer">
+        <span>共 {orderedEvents.length} 条</span>
+        <div className="history-pagination">
+          <button
+            type="button"
+            className="icon-button history-page-button"
+            onClick={() => setPage((current) => Math.max(1, current - 1))}
+            disabled={currentPage === 1}
+            aria-label="上一页"
+          >
+            <ChevronLeft size={17} />
+          </button>
+          <span>{currentPage} / {totalPages}</span>
+          <button
+            type="button"
+            className="icon-button history-page-button"
+            onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+            disabled={currentPage === totalPages}
+            aria-label="下一页"
+          >
+            <ChevronRight size={17} />
+          </button>
+        </div>
+      </div>
+    </section>
   );
 }
 
