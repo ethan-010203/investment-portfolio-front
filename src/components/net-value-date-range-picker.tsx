@@ -49,7 +49,10 @@ export function NetValueDateRangePicker() {
   const ready = Boolean(effectiveRange && firstDate && lastDate);
 
   const selectedRange = useMemo<DateRange | undefined>(() => {
-    if (pendingFrom) return { from: parseIsoDate(pendingFrom), to: undefined };
+    if (pendingFrom) {
+      const pendingDate = parseIsoDate(pendingFrom);
+      return { from: pendingDate, to: pendingDate };
+    }
     if (!effectiveRange) return undefined;
     return {
       from: parseIsoDate(effectiveRange.from),
