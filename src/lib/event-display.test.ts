@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  compareEventTriggersAscending,
   compareEventTriggersDescending,
   triggeredEventsThrough,
 } from "@/lib/event-display";
@@ -39,12 +38,7 @@ describe("调仓事件展示日期", () => {
       .toEqual(["formal"]);
   });
 
-  it("本期事件按触发日期从早到晚排列", () => {
-    expect([...events].reverse().sort(compareEventTriggersAscending).map((item) => item.id))
-      .toEqual(["formal", "stop"]);
-  });
-
-  it("往期事件按触发日期倒序排列", () => {
+  it("本期事件和往期事件都按触发日期倒序排列", () => {
     expect([...events].sort(compareEventTriggersDescending).map((item) => item.id))
       .toEqual(["stop", "formal"]);
   });

@@ -16,16 +16,6 @@ export function triggeredEventsThrough(
   return events.filter((event) => event.signalDate <= date);
 }
 
-export function compareEventTriggersAscending(
-  left: RebalanceEventSummary,
-  right: RebalanceEventSummary,
-): number {
-  const dateOrder = left.signalDate.localeCompare(right.signalDate);
-  if (dateOrder !== 0) return dateOrder;
-  return EVENT_TYPE_ORDER[left.type] - EVENT_TYPE_ORDER[right.type]
-    || left.sequence - right.sequence;
-}
-
 export function compareEventTriggersDescending(
   left: RebalanceEventSummary,
   right: RebalanceEventSummary,

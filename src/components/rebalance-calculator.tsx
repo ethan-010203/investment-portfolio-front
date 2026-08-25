@@ -11,7 +11,6 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { allocateCapital, normalizeCapital } from "@/lib/allocation";
 import { ASSETS, ASSET_BY_KEY, type AssetKey } from "@/lib/assets";
 import {
-  compareEventTriggersAscending,
   compareEventTriggersDescending,
   triggeredEventsThrough,
 } from "@/lib/event-display";
@@ -158,7 +157,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
   const cycleEvents = formalEvent
     ? eventsThroughSnapshot.filter((event) => event.cycleDate === formalEvent.cycleDate)
     : [];
-  const orderedCycleEvents = [...cycleEvents].sort(compareEventTriggersAscending);
+  const orderedCycleEvents = [...cycleEvents].sort(compareEventTriggersDescending);
 
   const allocationPieOption = useMemo<echarts.EChartsCoreOption>(
     () => ({
