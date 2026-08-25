@@ -27,11 +27,6 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
     [seriesRows, selectedAssets],
   );
   const metrics = useMemo(() => calculateMetrics(selectedCurveRows), [selectedCurveRows]);
-  const selectedWeight = useMemo(() => {
-    const latestWeights = seriesRows.at(-1)?.weights;
-    if (!latestWeights) return 0;
-    return selectedAssets.reduce((sum, key) => sum + latestWeights[key], 0);
-  }, [seriesRows, selectedAssets]);
   useEffect(() => {
     function closeOnOutsideClick(event: MouseEvent) {
       if (assetSelectorRef.current && !assetSelectorRef.current.contains(event.target as Node)) {
@@ -291,7 +286,6 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
           <div className="net-value-chart-header">
             <div>
               <h2>累计净值走势</h2>
-              <p>已选 {selectedAssets.length} 项 · 当前策略权重 {formatPercent(selectedWeight)} · {seriesRows.length} 个交易日</p>
             </div>
           </div>
           <EChart option={lineChartOption} className="net-value-chart-canvas" label="选中品种组合累计净值折线图" />
@@ -301,7 +295,6 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
           <div className="net-value-chart-header">
             <div>
               <h2>组合净值日度收益率</h2>
-              <p>{selectedCurveRows.length} 个交易日</p>
             </div>
           </div>
           <EChart option={barChartOption} className="net-value-chart-canvas" label="选中品种组合日度收益率柱状图" />
