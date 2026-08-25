@@ -128,9 +128,19 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
     [holdingAmounts],
   );
   const hasHoldingInputs = ASSETS.some((asset) => holdingInputs[asset.key].trim() !== "");
-  const allocations = useMemo(
-    () => allocateCapital(totalCapital, snapshot.weights),
-    [totalCapital, snapshot],
+  const strategyRows = useMemo(
+    () => ASSETS.map((asset) => ({ key: asset.key, weight: snapshot.weights[asset.key] })),
+    [snapshot.weights],
+  );
+  const targetAmounts = useMemo(
+    () => allocateCapital(totalCapital, snapshot.weights).reduce(
+      (amounts, row) => {
+        amounts[row.key] = row.amount;
+        return amounts;
+      },
+      {} as Record<AssetKey, number>,
+    ),
+    [totalCapital, snapshot.weights],
   );
   const tradeThreshold = totalCapital * 0.003;
   const eventsThroughSnapshot = useMemo(
@@ -193,7 +203,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
             scaleSize: 4,
             itemStyle: { shadowBlur: 12, shadowColor: "rgba(54, 63, 69, 0.18)" },
           },
-          data: allocations
+          data: strategyRows
             .filter((row) => row.weight > 0)
             .map((row) => ({
               name: ASSET_BY_KEY[row.key].label,
@@ -204,7 +214,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
         },
       ],
     }),
-    [allocations],
+    [strategyRows],
   );
 
   function updateHolding(key: AssetKey, value: string) {
@@ -265,10 +275,10 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
                 </tr>
               </thead>
               <tbody>
-                {allocations.map((row) => {
+                {strategyRows.map((row) => {
                   const asset = ASSET_BY_KEY[row.key];
                   const holdingAmount = holdingAmounts[row.key];
-                  const difference = row.amount - holdingAmount;
+                  const difference = targetAmounts[row.key] - holdingAmount;
                   const action = Math.abs(difference) <= tradeThreshold
                     ? "持有"
                     : difference > 0
@@ -316,6 +326,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
         <div className="rebalance-side-column">
           <section className="rebalance-pie-card overflow-hidden">
             <div className="rebalance-pie-hero">
+              <h2 className="rebalance-pie-title">最新持仓比例</h2>
               <div className="rebalance-pie-chart">
                 <EChart option={allocationPieOption} className="size-full" label="资产配置占比图" />
               </div>
