@@ -1,6 +1,7 @@
 "use client";
 
 import * as echarts from "echarts";
+import { Activity, ArrowDownRight, ArrowUpRight, Clock3 } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { EChart } from "@/components/echart";
@@ -217,16 +218,46 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
     <div className="net-value-layout">
       <aside className="net-value-sidebar">
         <div className="net-value-metrics">
-          <Metric label="累计净值" value={formatNumber(metrics.cumulativeNav, 4)} />
-          <Metric label="区间年化" value={formatPercent(metrics.annualizedReturn)} tone={returnTone(metrics.annualizedReturn)} />
-          <Metric label="年化波动率" value={formatPercent(metrics.annualizedVolatility)} />
-          <Metric label="夏普比率" value={formatNumber(metrics.sharpeRatio, 2)} tone={returnTone(metrics.sharpeRatio)} />
-          <Metric label="卡玛比率" value={formatNumber(metrics.calmarRatio, 2)} tone={returnTone(metrics.calmarRatio)} />
-          <Metric label="区间最大回撤" value={formatPercent(metrics.maximumDrawdown)} tone="negative" />
+          <Metric
+            label="累计净值"
+            value={formatNumber(metrics.cumulativeNav, 4)}
+            tone={returnTone(metrics.cumulativeNav - 1)}
+            status={metrics.cumulativeNav >= 1 ? "up" : "down"}
+          />
+          <Metric
+            label="区间年化"
+            value={formatPercent(metrics.annualizedReturn)}
+            tone={returnTone(metrics.annualizedReturn)}
+            status={metrics.annualizedReturn >= 0 ? "up" : "down"}
+          />
+          <Metric
+            label="年化波动率"
+            value={formatPercent(metrics.annualizedVolatility)}
+            status="risk"
+          />
+          <Metric
+            label="夏普比率"
+            value={formatNumber(metrics.sharpeRatio, 2)}
+            tone={returnTone(metrics.sharpeRatio)}
+            status={metrics.sharpeRatio >= 0 ? "up" : "down"}
+          />
+          <Metric
+            label="卡玛比率"
+            value={formatNumber(metrics.calmarRatio, 2)}
+            tone={returnTone(metrics.calmarRatio)}
+            status={metrics.calmarRatio >= 0 ? "up" : "down"}
+          />
+          <Metric
+            label="区间最大回撤"
+            value={formatPercent(metrics.maximumDrawdown)}
+            tone="negative"
+            status="down"
+          />
           <Metric
             label="最大回撤天数"
             value={`${metrics.maximumDrawdownDurationDays} 天`}
             detail={`${formatDate(metrics.maximumDrawdownStartDate)} - ${formatDate(metrics.maximumDrawdownEndDate)}`}
+            status="duration"
           />
         </div>
 
@@ -283,15 +314,29 @@ function Metric({
   value,
   detail,
   tone = "neutral",
+  status,
 }: {
   label: string;
   value: string;
   detail?: string;
   tone?: "positive" | "negative" | "neutral";
+  status: "up" | "down" | "risk" | "duration";
 }) {
+  const StatusIcon = status === "up"
+    ? ArrowUpRight
+    : status === "down"
+      ? ArrowDownRight
+      : status === "duration"
+        ? Clock3
+        : Activity;
   return (
     <div className="metric-card px-6 py-6 max-[520px]:px-4">
-      <div className="text-xs text-[var(--muted)]">{label}</div>
+      <div className="metric-title-row">
+        <span className={`metric-status-icon metric-status-${status}`} aria-hidden="true">
+          <StatusIcon size={14} strokeWidth={2.2} />
+        </span>
+        <span className="metric-label">{label}</span>
+      </div>
       <div className={`mt-2 font-mono text-2xl font-semibold tabular-nums max-[520px]:text-xl ${tone}`}>{value}</div>
       {detail && <div className="metric-detail">{detail}</div>}
     </div>
