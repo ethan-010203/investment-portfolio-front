@@ -216,71 +216,81 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
   return (
     <div className="net-value-layout">
       <aside className="net-value-sidebar">
-        <div className="net-value-metrics">
-          <Metric
-            label="累计净值"
-            value={formatNumber(metrics.cumulativeNav, 4)}
-            tone={returnTone(metrics.cumulativeNav - 1)}
-            status={metrics.cumulativeNav >= 1 ? "up" : "down"}
-          />
-          <Metric
-            label="区间年化"
-            value={formatPercent(metrics.annualizedReturn)}
-            tone={returnTone(metrics.annualizedReturn)}
-            status={metrics.annualizedReturn >= 0 ? "up" : "down"}
-          />
-          <Metric
-            label="年化波动率"
-            value={formatPercent(metrics.annualizedVolatility)}
-          />
-          <Metric
-            label="夏普比率"
-            value={formatNumber(metrics.sharpeRatio, 2)}
-            tone={returnTone(metrics.sharpeRatio)}
-            status={metrics.sharpeRatio >= 0 ? "up" : "down"}
-          />
-          <Metric
-            label="卡玛比率"
-            value={formatNumber(metrics.calmarRatio, 2)}
-            tone={returnTone(metrics.calmarRatio)}
-            status={metrics.calmarRatio >= 0 ? "up" : "down"}
-          />
-          <Metric
-            label="区间最大回撤"
-            value={formatPercent(metrics.maximumDrawdown)}
-            tone="negative"
-            status="down"
-          />
-          <Metric
-            label="最大回撤天数"
-            value={`${metrics.maximumDrawdownDurationDays} 天`}
-            detail={`${formatDate(metrics.maximumDrawdownStartDate)} - ${formatDate(metrics.maximumDrawdownEndDate)}`}
-          />
-        </div>
-
-        <div className="net-value-sidebar-controls">
-          <div className="net-value-control">
-            <span className="net-value-control-label">品种</span>
-            <div className="asset-options-list" aria-label="选择净值品种">
-              {SELECTABLE_ASSETS.map((asset) => {
-                const checked = selectedAssets.includes(asset.key);
-                return (
-                  <label key={asset.key} className="asset-option">
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      disabled={checked && selectedAssets.length === 1}
-                      onChange={() => toggleAsset(asset.key)}
-                    />
-                    <span className="asset-dot" style={{ backgroundColor: asset.color }} />
-                    <span className="asset-option-code">{asset.code}</span>
-                    <span className="asset-option-label">{asset.name}</span>
-                  </label>
-                );
-              })}
+        <section className="net-value-side-card net-value-performance-card">
+          <div className="net-value-side-card-body">
+            <h2 className="net-value-side-card-title">绩效</h2>
+            <div className="net-value-metrics">
+              <Metric
+                label="累计净值"
+                value={formatNumber(metrics.cumulativeNav, 4)}
+                tone={returnTone(metrics.cumulativeNav - 1)}
+                status={metrics.cumulativeNav >= 1 ? "up" : "down"}
+              />
+              <Metric
+                label="区间年化"
+                value={formatPercent(metrics.annualizedReturn)}
+                tone={returnTone(metrics.annualizedReturn)}
+                status={metrics.annualizedReturn >= 0 ? "up" : "down"}
+              />
+              <Metric
+                label="年化波动率"
+                value={formatPercent(metrics.annualizedVolatility)}
+              />
+              <Metric
+                label="夏普比率"
+                value={formatNumber(metrics.sharpeRatio, 2)}
+                tone={returnTone(metrics.sharpeRatio)}
+                status={metrics.sharpeRatio >= 0 ? "up" : "down"}
+              />
+              <Metric
+                label="卡玛比率"
+                value={formatNumber(metrics.calmarRatio, 2)}
+                tone={returnTone(metrics.calmarRatio)}
+                status={metrics.calmarRatio >= 0 ? "up" : "down"}
+              />
+              <Metric
+                label="区间最大回撤"
+                value={formatPercent(metrics.maximumDrawdown)}
+                tone="negative"
+                status="down"
+              />
+              <Metric
+                className="metric-card-wide"
+                label="最大回撤天数"
+                value={`${metrics.maximumDrawdownDurationDays} 天`}
+                detail={`${formatDate(metrics.maximumDrawdownStartDate)} - ${formatDate(metrics.maximumDrawdownEndDate)}`}
+              />
             </div>
           </div>
-        </div>
+        </section>
+
+        <section className="net-value-side-card net-value-assets-card">
+          <div className="net-value-side-card-body">
+            <div className="net-value-sidebar-controls">
+              <div className="net-value-control">
+                <h2 className="net-value-side-card-title">品种</h2>
+                <div className="asset-options-list" aria-label="选择净值品种">
+                  {SELECTABLE_ASSETS.map((asset) => {
+                    const checked = selectedAssets.includes(asset.key);
+                    return (
+                      <label key={asset.key} className="asset-option">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          disabled={checked && selectedAssets.length === 1}
+                          onChange={() => toggleAsset(asset.key)}
+                        />
+                        <span className="asset-dot" style={{ backgroundColor: asset.color }} />
+                        <span className="asset-option-code">{asset.code}</span>
+                        <span className="asset-option-label">{asset.name}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </aside>
 
       <div className="net-value-charts">
@@ -307,12 +317,14 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
 }
 
 function Metric({
+  className = "",
   label,
   value,
   detail,
   tone = "neutral",
   status,
 }: {
+  className?: string;
   label: string;
   value: string;
   detail?: string;
@@ -320,7 +332,7 @@ function Metric({
   status?: "up" | "down";
 }) {
   return (
-    <div className="metric-card px-6 py-6 max-[520px]:px-4">
+    <div className={`metric-card ${className}`}>
       <div className="metric-title-row">
         <span className="metric-label">{label}</span>
       </div>
