@@ -369,61 +369,59 @@ header nav a:not([aria-current="page"]) {
   background: var(--surface);
 }
 
+.rebalance-page {
+  display: flex;
+  height: calc(100svh - 132px);
+  min-height: 620px;
+  flex-direction: column;
+}
+
 .rebalance-toolbar {
   display: flex;
   justify-content: flex-end;
   margin-bottom: 18px;
 }
 
+.rebalance-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  flex: 1 1 0%;
+  gap: 20px;
+  min-height: 0;
+}
+
+.rebalance-calculator-panel {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.rebalance-table-scroll {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+}
+
 .rebalance-side-column {
   display: grid;
-  align-content: start;
+  grid-template-rows: minmax(220px, 0.8fr) minmax(0, 1.2fr);
   gap: 18px;
+  height: 100%;
   min-width: 0;
+  min-height: 0;
 }
 
 .rebalance-pie-card {
+  display: grid;
+  min-height: 0;
+  place-items: center;
   background: var(--surface);
-}
-
-.rebalance-pie-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  border-bottom: 1px solid var(--line);
-  padding: 18px 20px;
-}
-
-.rebalance-pie-header h2 {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 680;
-}
-
-.rebalance-pie-header span {
-  color: var(--muted);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
-}
-
-.rebalance-pie-content {
-  padding: 16px 20px 20px;
 }
 
 .rebalance-pie-chart {
   position: relative;
-  width: min(100%, 220px);
+  width: min(100%, 240px);
   aspect-ratio: 1;
-  margin: 0 auto;
-}
-
-.rebalance-pie-legend {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px 16px;
-  margin-top: 12px;
 }
 
 .rebalance-input-summary {
@@ -480,6 +478,10 @@ header nav a:not([aria-current="page"]) {
 
 .risk-card {
   background: var(--surface);
+}
+
+.rebalance-side-column > .risk-card {
+  height: 100%;
 }
 
 .control-pill {
@@ -584,6 +586,39 @@ header nav a:not([aria-current="page"]) {
   .net-value-charts {
     grid-template-rows: minmax(340px, 1fr) minmax(340px, 1fr);
     min-height: 700px;
+  }
+}
+
+@media (max-width: 940px) {
+  .rebalance-page {
+    height: auto;
+    min-height: 0;
+  }
+
+  .rebalance-workspace {
+    grid-template-columns: 1fr;
+    flex: none;
+  }
+
+  .rebalance-calculator-panel {
+    height: auto;
+  }
+
+  .rebalance-table-scroll {
+    overflow-y: visible;
+  }
+
+  .rebalance-side-column {
+    grid-template-rows: none;
+    height: auto;
+  }
+
+  .rebalance-side-column > .risk-card {
+    height: auto;
+  }
+
+  .rebalance-pie-card {
+    min-height: 280px;
   }
 }
 

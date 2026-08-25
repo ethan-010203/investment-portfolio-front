@@ -8,7 +8,7 @@ import { EChart } from "@/components/echart";
 import { SegmentedControl } from "@/components/segmented-control";
 import { allocateCapital, normalizeCapital } from "@/lib/allocation";
 import { ASSETS, ASSET_BY_KEY, type AssetKey } from "@/lib/assets";
-import { formatCurrency, formatDate, formatNumber, formatPercent } from "@/lib/format";
+import { formatCurrency, formatDate, formatPercent } from "@/lib/format";
 import type { NavRecord, PortfolioDataset, RebalanceEventSummary } from "@/lib/types";
 
 type Mode = "current" | "history";
@@ -128,7 +128,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
   }
 
   return (
-    <>
+    <div className="rebalance-page">
       <div className="rebalance-toolbar">
         <SegmentedControl value={mode} options={MODE_OPTIONS} onChange={setMode} label="调仓周期" />
       </div>
@@ -155,8 +155,8 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
         </div>
       )}
 
-      <div className="grid grid-cols-[minmax(0,1fr)_340px] gap-5 max-[940px]:grid-cols-1">
-        <section className="panel calculator-card overflow-hidden">
+      <div className="rebalance-workspace">
+        <section className="panel calculator-card rebalance-calculator-panel overflow-hidden">
           <div className="rebalance-input-summary border-b border-[var(--line)]">
             <div>
               <div className="text-sm font-semibold">当前持仓</div>
@@ -168,7 +168,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
             </div>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="rebalance-table-scroll overflow-x-auto">
             <table className="w-full min-w-[860px] border-collapse text-left">
               <thead>
                 <tr className="border-b border-[var(--line)] text-xs text-[var(--muted)]">
@@ -244,34 +244,8 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
 
         <div className="rebalance-side-column">
           <section className="panel rebalance-pie-card overflow-hidden">
-            <div className="rebalance-pie-header">
-              <h2>资产配置</h2>
-              <span>{formatDate(snapshot.date)}</span>
-            </div>
-            <div className="rebalance-pie-content">
-              <div className="rebalance-pie-chart">
-                <EChart option={donutOption} className="size-full" label="资产配置占比图" />
-                <div className="pointer-events-none absolute inset-0 grid place-items-center text-center">
-                  <div>
-                    <div className="text-xs text-[var(--muted)]">最新净值</div>
-                    <div className="mt-1 font-mono text-lg font-semibold">{formatNumber(snapshot.cumulativeNav, 4)}</div>
-                  </div>
-                </div>
-              </div>
-              <div className="rebalance-pie-legend">
-                {allocations.map((row) => {
-                  const asset = ASSET_BY_KEY[row.key];
-                  return (
-                    <div key={row.key} className="flex min-w-0 items-center justify-between gap-2 text-xs">
-                      <span className="flex min-w-0 items-center gap-1.5">
-                        <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: asset.color }} />
-                        <span className="truncate text-[var(--muted)]">{asset.label}</span>
-                      </span>
-                      <span className="font-mono tabular-nums">{formatPercent(row.weight, 1)}</span>
-                    </div>
-                  );
-                })}
-              </div>
+            <div className="rebalance-pie-chart">
+              <EChart option={donutOption} className="size-full" label="资产配置占比图" />
             </div>
           </section>
 
@@ -323,7 +297,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
           </aside>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
