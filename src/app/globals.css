@@ -1,18 +1,26 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f4f1e9;
-  --surface: #faf8f2;
-  --surface-strong: #fffdf8;
-  --foreground: #191a18;
-  --muted: #73736d;
-  --line: #dedbd2;
-  --line-strong: #cfcbc0;
-  --blue: #335f88;
-  --blue-soft: #e7eef4;
-  --positive: #c3453d;
-  --negative: #168153;
-  --shadow: 0 10px 34px rgb(45 43 36 / 6%);
+  --background: #f7f5ef;
+  --surface: #fffdf8;
+  --surface-strong: #ffffff;
+  --foreground: #202124;
+  --muted: #777875;
+  --line: transparent;
+  --line-strong: transparent;
+  --blue: #2f6288;
+  --blue-deep: #164b70;
+  --blue-soft: #dcecf5;
+  --blue-card: #d9edf6;
+  --sky-card: #e8f3f7;
+  --mint-card: #dcefe5;
+  --yellow-card: #f6e9bd;
+  --coral-card: #f8ddd2;
+  --lavender-card: #e9e4f5;
+  --positive: #c8483f;
+  --negative: #16805f;
+  --shadow: 0 16px 44px rgb(61 65 61 / 7%);
+  --shadow-hover: 0 18px 52px rgb(61 65 61 / 12%);
 }
 
 @theme inline {
@@ -32,7 +40,7 @@ html {
 
 body {
   margin: 0;
-  background: linear-gradient(rgb(255 255 255 / 16%), rgb(255 255 255 / 16%)), var(--background);
+  background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
   letter-spacing: 0;
@@ -54,18 +62,18 @@ button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 select:focus-visible {
-  outline: 2px solid var(--blue);
-  outline-offset: 2px;
+  outline: 3px solid rgb(47 98 136 / 30%);
+  outline-offset: 3px;
 }
 
 ::selection {
-  background: #c9d9e7;
+  background: #c9e2ee;
 }
 
 .page-shell {
-  width: min(1180px, calc(100% - 40px));
+  width: min(1240px, calc(100% - 48px));
   margin: 0 auto;
-  padding: 46px 0 72px;
+  padding: 50px 0 84px;
 }
 
 .page-title-row {
@@ -73,14 +81,15 @@ select:focus-visible {
   align-items: flex-end;
   justify-content: space-between;
   gap: 24px;
-  margin-bottom: 28px;
+  margin-bottom: 30px;
 }
 
 .page-title {
   margin: 0;
-  font-size: 34px;
-  font-weight: 650;
-  line-height: 1.15;
+  font-size: 42px;
+  font-weight: 680;
+  letter-spacing: -1.2px;
+  line-height: 1.08;
 }
 
 .eyebrow {
@@ -90,10 +99,32 @@ select:focus-visible {
 }
 
 .panel {
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: rgb(255 253 248 / 72%);
+  border: 0;
+  border-radius: 30px;
+  background: rgb(255 253 248 / 84%);
   box-shadow: var(--shadow);
+}
+
+.panel.overflow-hidden {
+  overflow: hidden;
+}
+
+header nav a[aria-current="page"] {
+  border-radius: 999px;
+  background: var(--blue-deep) !important;
+  color: #f9fcfb !important;
+  box-shadow: 0 5px 12px rgb(29 81 111 / 17%);
+}
+
+header nav a:not([aria-current="page"]) {
+  border-radius: 999px;
+}
+
+.border-b,
+.border-t,
+.border-r,
+.border-l {
+  border-color: transparent !important;
 }
 
 .positive {
@@ -108,16 +139,154 @@ select:focus-visible {
   color: var(--foreground);
 }
 
+.home-hero {
+  background: var(--surface);
+  box-shadow: 0 20px 58px rgb(87 91 83 / 9%);
+}
+
+.home-hero-main {
+  background: var(--surface);
+}
+
+.home-hero-side {
+  background: var(--blue-card);
+}
+
+.action-card {
+  min-height: 142px;
+  border-radius: 26px;
+  box-shadow: 0 14px 36px rgb(87 91 83 / 6%);
+}
+
+.action-card-blue {
+  background: var(--blue-card);
+}
+
+.action-card-mint {
+  background: var(--mint-card);
+}
+
+.metric-card {
+  min-height: 116px;
+  border-radius: 24px;
+  background: var(--surface);
+  box-shadow: 0 12px 30px rgb(87 91 83 / 5%);
+}
+
+.metric-card:nth-child(2) {
+  background: var(--coral-card);
+}
+
+.metric-card:nth-child(3) {
+  background: var(--blue-card);
+}
+
+.metric-card:nth-child(4) {
+  background: var(--mint-card);
+}
+
+.chart-card {
+  background: var(--surface);
+}
+
+.table-card {
+  background: var(--surface);
+}
+
+.calculator-card {
+  background: var(--surface);
+}
+
+.history-card {
+  background: var(--sky-card);
+}
+
+.risk-card {
+  background: var(--lavender-card);
+}
+
+.control-pill {
+  border-radius: 999px;
+  background: rgb(226 232 230 / 70%);
+  padding: 5px;
+}
+
+.control-pill button {
+  border-radius: 999px;
+}
+
+.control-pill button[aria-pressed="true"] {
+  background: var(--surface-strong);
+  box-shadow: 0 5px 14px rgb(61 65 61 / 10%);
+}
+
+.soft-input {
+  border: 0;
+  border-radius: 18px;
+  background: #f0f1ed;
+  box-shadow: inset 0 1px 1px rgb(61 65 61 / 4%);
+}
+
+.soft-input:focus {
+  background: #edf5f7;
+  box-shadow: inset 0 0 0 3px rgb(47 98 136 / 16%);
+  outline: 0;
+}
+
+.primary-button {
+  border-radius: 999px;
+  background: var(--blue-deep);
+  box-shadow: 0 9px 20px rgb(22 75 112 / 18%);
+}
+
+.primary-button:hover {
+  background: #215b84;
+  box-shadow: 0 12px 24px rgb(22 75 112 / 25%);
+}
+
+.icon-button {
+  border-radius: 999px;
+  background: #eef0ed;
+}
+
+.icon-button:hover {
+  background: #e3e8e5;
+}
+
+.table-row {
+  border-color: transparent;
+}
+
+.table-row:hover {
+  background: #eef5f5;
+}
+
+.summary-item {
+  background: #f1f3ef;
+}
+
+.summary-item:nth-child(2) {
+  background: var(--yellow-card);
+}
+
+.summary-item:nth-child(3) {
+  background: var(--sky-card);
+}
+
+.summary-item:nth-child(4) {
+  background: var(--mint-card);
+}
+
 .skeleton {
   overflow: hidden;
   position: relative;
-  background: #e7e3da;
+  background: #e7e9e4;
 }
 
 .skeleton::after {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 52%), transparent);
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 55%), transparent);
   content: "";
   transform: translateX(-100%);
   animation: shimmer 1.5s infinite;
@@ -131,18 +300,19 @@ select:focus-visible {
 
 @media (max-width: 680px) {
   .page-shell {
-    width: min(100% - 24px, 1180px);
-    padding-top: 28px;
+    width: min(100% - 24px, 1240px);
+    padding-top: 30px;
   }
 
   .page-title-row {
     align-items: flex-start;
     flex-direction: column;
-    gap: 12px;
-    margin-bottom: 22px;
+    gap: 16px;
+    margin-bottom: 24px;
   }
 
   .page-title {
-    font-size: 28px;
+    font-size: 34px;
+    letter-spacing: -0.8px;
   }
 }

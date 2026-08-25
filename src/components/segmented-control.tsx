@@ -18,7 +18,7 @@ export function SegmentedControl<T extends string>({
 }: SegmentedControlProps<T>) {
   return (
     <div
-      className="inline-flex min-h-10 items-center rounded-lg border border-[var(--line)] bg-[#ebe8df] p-1"
+      className="control-pill inline-flex min-h-11 items-center"
       role="group"
       aria-label={label}
     >

@@ -113,7 +113,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
       </div>
 
       {mode === "history" && (
-        <div className="panel mb-5 flex items-center gap-4 px-5 py-4 max-[680px]:items-stretch max-[680px]:flex-col">
+        <div className="panel history-card mb-5 flex items-center gap-4 px-5 py-4 max-[680px]:items-stretch max-[680px]:flex-col">
           <div className="flex items-center gap-2 text-sm font-medium">
             <CalendarDays size={16} className="text-[var(--muted)]" />
             <span>历史事件</span>
@@ -122,7 +122,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
             <select
               value={selectedEventId}
               onChange={(event) => setSelectedEventId(event.target.value)}
-              className="h-10 w-full appearance-none rounded-[7px] border border-[var(--line)] bg-[var(--surface-strong)] px-3 pr-9 text-sm"
+              className="soft-input h-11 w-full appearance-none px-4 pr-9 text-sm"
               aria-label="选择历史调仓事件"
             >
               {availableEvents.map((event) => (
@@ -135,7 +135,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
       )}
 
       <div className="grid grid-cols-[minmax(0,1fr)_340px] gap-5 max-[940px]:grid-cols-1">
-        <section className="panel overflow-hidden">
+        <section className="panel calculator-card overflow-hidden">
           <form onSubmit={submitCapital} className="border-b border-[var(--line)] p-6 max-[680px]:p-5">
             <label htmlFor="capital" className="text-sm font-semibold">投入本金</label>
             <div className="mt-3 flex gap-3 max-[520px]:flex-col">
@@ -147,11 +147,11 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
                   onChange={(event) => setCapitalInput(event.target.value)}
                   inputMode="decimal"
                   autoComplete="off"
-                  className="h-12 w-full rounded-[7px] border border-[var(--line-strong)] bg-[var(--surface-strong)] pr-4 pl-9 font-mono text-lg tabular-nums"
+                  className="soft-input h-12 w-full pr-4 pl-9 font-mono text-lg tabular-nums"
                   aria-invalid={Boolean(inputError)}
                 />
               </div>
-              <button type="submit" className="flex h-12 items-center justify-center gap-2 rounded-[7px] bg-[#1c1d1b] px-5 text-sm font-medium text-[#fffdf8] hover:bg-[#30312e]">
+              <button type="submit" className="primary-button flex h-12 items-center justify-center gap-2 px-6 text-sm font-medium text-[#f9fcfb]">
                 <Calculator size={17} />
                 计算配置
               </button>
@@ -160,7 +160,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
           </form>
 
           <div className="grid grid-cols-[220px_1fr] border-b border-[var(--line)] max-[680px]:grid-cols-1">
-            <div className="grid place-items-center border-r border-[var(--line)] p-4 max-[680px]:border-r-0 max-[680px]:border-b">
+            <div className="grid place-items-center bg-[var(--sky-card)] p-4 max-[680px]:border-r-0 max-[680px]:border-b">
               <div className="relative size-[190px]">
                 <EChart option={donutOption} className="size-full" label="资产配置占比图" />
                 <div className="pointer-events-none absolute inset-0 grid place-items-center text-center">
@@ -193,7 +193,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
                 {allocations.map((row) => {
                   const asset = ASSET_BY_KEY[row.key];
                   return (
-                    <tr key={row.key} className="border-b border-[var(--line)] last:border-0">
+                    <tr key={row.key} className="table-row border-b border-[var(--line)] last:border-0">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: asset.color }} />
@@ -221,9 +221,9 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
           </div>
         </section>
 
-        <aside className="panel h-fit overflow-hidden">
+        <aside className="panel risk-card h-fit overflow-hidden">
           <div className="flex items-center gap-3 border-b border-[var(--line)] px-5 py-5">
-            <span className="grid size-9 place-items-center rounded-[7px] bg-[var(--blue-soft)] text-[var(--blue)]">
+            <span className="grid size-10 place-items-center rounded-full bg-[var(--blue-soft)] text-[var(--blue)]">
               <ShieldCheck size={18} />
             </span>
             <div>
@@ -274,7 +274,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
 
 function SummaryItem({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border-r border-b border-[var(--line)] p-5 even:border-r-0 nth-[n+3]:border-b-0 max-[420px]:p-4">
+    <div className="summary-item border-r border-b border-[var(--line)] p-5 even:border-r-0 nth-[n+3]:border-b-0 max-[420px]:p-4">
       <div className="text-xs text-[var(--muted)]">{label}</div>
       <div className="mt-2 truncate font-mono text-sm font-semibold tabular-nums" title={value}>{value}</div>
     </div>

@@ -17,9 +17,9 @@ export default async function Home() {
         <span className="eyebrow">{formatDate(latest.date)} 更新</span>
       </div>
 
-      <section className="panel overflow-hidden">
+      <section className="panel home-hero overflow-hidden">
         <div className="grid min-h-[310px] grid-cols-[1fr_310px] max-[820px]:grid-cols-1">
-          <article className="flex flex-col justify-between p-9 max-[680px]:p-6">
+          <article className="home-hero-main flex flex-col justify-between p-10 max-[680px]:p-6">
             <div>
               <div className="mb-8 flex items-center gap-2 text-xs font-semibold text-[var(--negative)]">
                 <CircleCheck size={15} />
@@ -38,7 +38,7 @@ export default async function Home() {
             </div>
           </article>
 
-          <aside className="border-l border-[var(--line)] bg-[rgb(231_238_244_/_42%)] p-8 max-[820px]:border-t max-[820px]:border-l-0 max-[680px]:p-6">
+          <aside className="home-hero-side p-8 max-[820px]:border-t max-[820px]:border-l-0 max-[680px]:p-6">
             <div className="eyebrow">最新结算</div>
             <div className="mt-7 border-b border-[var(--line)] pb-6">
               <div className="text-sm text-[var(--muted)]">累计净值</div>
@@ -63,14 +63,14 @@ export default async function Home() {
       </section>
 
       <div className="mt-5 grid grid-cols-2 gap-5 max-[680px]:grid-cols-1">
-        <Link href="/net-value" className="group panel flex min-h-28 items-center justify-between p-6 transition-colors hover:border-[var(--line-strong)] hover:bg-[var(--surface-strong)]">
+        <Link href="/net-value" className="group action-card action-card-blue flex items-center justify-between p-7 transition-all hover:-translate-y-1 hover:shadow-[var(--shadow-hover)]">
           <div>
             <div className="text-sm text-[var(--muted)]">组合表现</div>
             <div className="mt-2 text-lg font-semibold">每日净值</div>
           </div>
           <ArrowUpRight className="text-[var(--muted)] transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" size={20} />
         </Link>
-        <Link href="/rebalance" className="group panel flex min-h-28 items-center justify-between p-6 transition-colors hover:border-[var(--line-strong)] hover:bg-[var(--surface-strong)]">
+        <Link href="/rebalance" className="group action-card action-card-mint flex items-center justify-between p-7 transition-all hover:-translate-y-1 hover:shadow-[var(--shadow-hover)]">
           <div>
             <div className="text-sm text-[var(--muted)]">资产配置</div>
             <div className="mt-2 text-lg font-semibold">调仓计算</div>

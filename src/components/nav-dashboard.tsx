@@ -105,14 +105,14 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
 
   return (
     <>
-      <div className="mb-5 grid grid-cols-4 border-y border-[var(--line)] max-[760px]:grid-cols-2">
+      <div className="mb-5 grid grid-cols-4 gap-3 max-[760px]:grid-cols-2">
         <Metric label="累计净值" value={formatNumber(metrics.cumulativeNav, 4)} />
         <Metric label="区间末日收益" value={formatPercent(metrics.latestReturn)} tone={returnTone(metrics.latestReturn)} />
         <Metric label="区间年化" value={formatPercent(metrics.annualizedReturn)} tone={returnTone(metrics.annualizedReturn)} />
         <Metric label="区间最大回撤" value={formatPercent(metrics.maximumDrawdown)} tone="negative" />
       </div>
 
-      <section className="panel overflow-hidden">
+      <section className="panel chart-card overflow-hidden">
         <div className="flex items-center justify-between gap-4 border-b border-[var(--line)] px-6 py-5 max-[600px]:items-start max-[600px]:flex-col">
           <div>
             <h2 className="text-base font-semibold">累计净值走势</h2>
@@ -123,7 +123,7 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
         <EChart option={chartOption} className="h-[390px] w-full max-[680px]:h-[300px]" label="累计净值走势图" />
       </section>
 
-      <section className="panel mt-5 overflow-hidden">
+      <section className="panel table-card mt-5 overflow-hidden">
         <div className="flex items-center justify-between border-b border-[var(--line)] px-6 py-5">
           <h2 className="text-base font-semibold">每日记录</h2>
           <span className="text-xs text-[var(--muted)]">共 {descendingRows.length} 条</span>
@@ -142,7 +142,7 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
             </thead>
             <tbody>
               {tableRows.map((row) => (
-                <tr key={row.date} className="border-b border-[var(--line)] last:border-0 hover:bg-[rgb(231_238_244_/_28%)]">
+                <tr key={row.date} className="table-row border-b border-[var(--line)] last:border-0">
                   <td className="px-6 py-4 text-sm font-medium">{formatDate(row.date)}</td>
                   <td className="px-4 py-4 text-right font-mono text-sm tabular-nums">{formatNumber(row.cumulativeNav, 4)}</td>
                   <td className={`px-4 py-4 text-right font-mono text-sm font-semibold tabular-nums ${returnTone(row.netReturn)}`}>
@@ -161,10 +161,10 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
         <div className="flex items-center justify-between border-t border-[var(--line)] px-6 py-4">
           <span className="text-xs text-[var(--muted)]">第 {visiblePage} / {totalPages} 页</span>
           <div className="flex gap-2">
-            <button type="button" aria-label="上一页" title="上一页" disabled={visiblePage === 1} onClick={() => setPage((current) => Math.max(1, current - 1))} className="grid size-9 place-items-center rounded-[7px] border border-[var(--line)] disabled:cursor-not-allowed disabled:opacity-35">
+            <button type="button" aria-label="上一页" title="上一页" disabled={visiblePage === 1} onClick={() => setPage((current) => Math.max(1, current - 1))} className="icon-button grid size-10 place-items-center disabled:cursor-not-allowed disabled:opacity-35">
               <ChevronLeft size={16} />
             </button>
-            <button type="button" aria-label="下一页" title="下一页" disabled={visiblePage === totalPages} onClick={() => setPage((current) => Math.min(totalPages, current + 1))} className="grid size-9 place-items-center rounded-[7px] border border-[var(--line)] disabled:cursor-not-allowed disabled:opacity-35">
+            <button type="button" aria-label="下一页" title="下一页" disabled={visiblePage === totalPages} onClick={() => setPage((current) => Math.min(totalPages, current + 1))} className="icon-button grid size-10 place-items-center disabled:cursor-not-allowed disabled:opacity-35">
               <ChevronRight size={16} />
             </button>
           </div>
@@ -176,7 +176,7 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
 
 function Metric({ label, value, tone = "neutral" }: { label: string; value: string; tone?: "positive" | "negative" | "neutral" }) {
   return (
-    <div className="border-r border-[var(--line)] px-6 py-6 last:border-r-0 max-[760px]:border-b max-[760px]:nth-[2n]:border-r-0 max-[760px]:nth-[n+3]:border-b-0 max-[520px]:px-4">
+    <div className="metric-card px-6 py-6 max-[520px]:px-4">
       <div className="text-xs text-[var(--muted)]">{label}</div>
       <div className={`mt-2 font-mono text-2xl font-semibold tabular-nums max-[520px]:text-xl ${tone}`}>{value}</div>
     </div>
