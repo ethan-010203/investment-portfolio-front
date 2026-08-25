@@ -3,6 +3,7 @@ import "server-only";
 import { queryRows } from "@/lib/turso";
 import type {
   AssetReturnMap,
+  EventWeightAdjustment,
   NavRecord,
   NavSeriesRecord,
   PortfolioDataset,
@@ -104,7 +105,33 @@ function parseEventSummary(row: Record<string, unknown>): RebalanceEventSummary 
     sequence: number(row, "sequence"),
     asset: text(row, "asset"),
     reason: text(row, "reason"),
+    adjustments: parseEventAdjustments(row["adjustments"]),
   };
+}
+
+function parseEventAdjustments(value: unknown): EventWeightAdjustment[] {
+  if (typeof value !== "string" || !value) throw new Error("调仓事件缺少调整明细");
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(value);
+  } catch {
+    throw new Error("调仓事件调整明细不是有效 JSON");
+  }
+  if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error("调仓事件调整明细结构无效");
+  }
+  return Object.entries(parsed).map(([asset, raw]) => {
+    if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
+      throw new Error(`调仓事件的${asset}调整明细无效`);
+    }
+    const details = raw as Record<string, unknown>;
+    const beforeWeight = Number(details["调整前实际权重"]);
+    const afterWeight = Number(details["调整后目标权重"]);
+    if (!Number.isFinite(beforeWeight) || !Number.isFinite(afterWeight)) {
+      throw new Error(`调仓事件的${asset}权重无效`);
+    }
+    return { asset, beforeWeight, afterWeight };
+  });
 }
 
 const NAV_SELECT = `
@@ -188,7 +215,8 @@ const EVENT_SUMMARY_SQL = `
     "执行日期" AS execution_date,
     "执行顺序" AS sequence,
     "事件资产" AS asset,
-    "触发原因" AS reason
+    "触发原因" AS reason,
+    "调整明细" AS adjustments
   FROM "策略调仓事件"
   WHERE "策略版本" = ?
   ORDER BY "执行日期", "执行顺序"`;

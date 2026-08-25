@@ -19,6 +19,9 @@ const MODE_OPTIONS = [
 ] as const;
 
 const HISTORY_PAGE_SIZE = 10;
+const EVENT_ASSET_COLORS = Object.fromEntries(
+  ASSETS.map((asset) => [asset.label, asset.color]),
+) as Record<string, string>;
 
 function emptyHoldingInputs(): Record<AssetKey, string> {
   return ASSETS.reduce(
@@ -209,20 +212,35 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
           <div className="border-b border-[var(--line)] px-5 py-5">
             <h2 className="text-lg font-semibold">本期事件</h2>
           </div>
-          <div className="px-5 py-5">
-            <div className="mt-4">
+          <div className="event-timeline-scroll">
+            <div className="event-timeline">
               {orderedCycleEvents.map((event, index) => (
-                <div key={event.id} className="relative flex gap-3 pb-5 last:pb-0">
-                  {index < orderedCycleEvents.length - 1 && <span className="absolute top-4 bottom-0 left-[5px] w-px bg-[var(--line)]" />}
-                  <span className={`relative mt-1.5 size-[11px] shrink-0 rounded-full border-2 border-[var(--surface-strong)] ${event.type === "正式调仓" ? "bg-[var(--blue)]" : "bg-[#b58a3a]"}`} />
-                  <div className="min-w-0">
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="text-sm font-semibold">{event.type}</span>
-                      <span className="shrink-0 text-xs text-[var(--muted)]">{formatDate(event.executionDate)}</span>
-                    </div>
-                    <p className="mt-1 text-xs leading-5 text-[var(--muted)]">{event.asset} · {event.reason}</p>
+                <article key={event.id} className="event-timeline-item">
+                  <div className="event-timeline-axis" aria-hidden="true">
+                    <span className={`event-timeline-node ${event.type === "正式调仓" ? "event-timeline-node-formal" : "event-timeline-node-risk"}`} />
+                    {index < orderedCycleEvents.length - 1 && <span className="event-timeline-line" />}
                   </div>
-                </div>
+                  <div className="event-timeline-content">
+                    <div className="event-timeline-heading">
+                      <span>{event.type}</span>
+                      <time dateTime={event.executionDate}>{formatDate(event.executionDate)}</time>
+                    </div>
+                    <p className="event-timeline-description">{event.asset} · {event.reason}</p>
+                    <div className="event-adjustment-list">
+                      {event.adjustments.map((adjustment) => (
+                        <div key={adjustment.asset} className="event-adjustment-row">
+                          <span
+                            className="event-adjustment-dot"
+                            style={{ backgroundColor: EVENT_ASSET_COLORS[adjustment.asset] ?? "#8b918c" }}
+                          />
+                          <span>
+                            {adjustment.asset}由 <strong>{formatPercent(adjustment.beforeWeight)}</strong> 调至 <strong>{formatPercent(adjustment.afterWeight)}</strong>
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </article>
               ))}
               {orderedCycleEvents.length === 0 && <div className="text-sm text-[var(--muted)]">暂无本期事件</div>}
             </div>

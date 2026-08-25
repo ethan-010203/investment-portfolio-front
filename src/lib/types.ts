@@ -39,6 +39,13 @@ export type RebalanceEventSummary = {
   sequence: number;
   asset: string;
   reason: string;
+  adjustments: EventWeightAdjustment[];
+};
+
+export type EventWeightAdjustment = {
+  asset: string;
+  beforeWeight: number;
+  afterWeight: number;
 };
 
 export type PortfolioDataset = {
