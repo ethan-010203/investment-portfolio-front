@@ -191,7 +191,7 @@ select:focus-visible {
 }
 
 .net-value-date-trigger {
-  min-width: 144px;
+  min-width: 286px;
 }
 
 .net-value-page {
@@ -1188,10 +1188,8 @@ header nav a:not([aria-current="page"]) {
 
   .net-value-date-range {
     grid-area: date-range;
-    display: grid;
+    display: block;
     width: 100%;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
     margin: 0;
   }
 

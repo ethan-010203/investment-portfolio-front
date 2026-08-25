@@ -23,8 +23,7 @@ type NetValueDateRangeContextValue = {
   effectiveRange: DateRangeValue | null;
   hasCustomRange: boolean;
   registerAvailableDates: (dates: readonly string[]) => void;
-  setFrom: (date: string) => void;
-  setTo: (date: string) => void;
+  setRange: (range: DateRangeValue | null) => void;
 };
 
 const NetValueDateRangeContext = createContext<NetValueDateRangeContextValue | null>(null);
@@ -81,30 +80,17 @@ export function NetValueDateRangeProvider({ children }: { children: ReactNode })
     [availableDates, requestedRange],
   );
 
-  const setFrom = useCallback((date: string) => {
-    setRequestedRange((current) => {
-      const resolved = resolveDateRange(availableDates, current);
-      const to = resolved?.to ?? date;
-      return date > to ? { from: date, to: date } : { from: date, to };
-    });
-  }, [availableDates]);
-
-  const setTo = useCallback((date: string) => {
-    setRequestedRange((current) => {
-      const resolved = resolveDateRange(availableDates, current);
-      const from = resolved?.from ?? date;
-      return date < from ? { from: date, to: date } : { from, to: date };
-    });
-  }, [availableDates]);
+  const setRange = useCallback((range: DateRangeValue | null) => {
+    setRequestedRange(range);
+  }, []);
 
   const value = useMemo<NetValueDateRangeContextValue>(() => ({
     availableDates,
     effectiveRange,
     hasCustomRange: requestedRange !== null,
     registerAvailableDates,
-    setFrom,
-    setTo,
-  }), [availableDates, effectiveRange, registerAvailableDates, requestedRange, setFrom, setTo]);
+    setRange,
+  }), [availableDates, effectiveRange, registerAvailableDates, requestedRange, setRange]);
 
   return (
     <NetValueDateRangeContext.Provider value={value}>
