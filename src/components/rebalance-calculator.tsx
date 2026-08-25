@@ -24,59 +24,14 @@ const EVENT_ASSET_COLORS = Object.fromEntries(
   ASSETS.map((asset) => [asset.label, asset.color]),
 ) as Record<string, string>;
 
-const PIE_DECALS = {
-  dividend: {
-    symbol: "rect",
-    symbolSize: 1,
-    color: "rgba(255, 255, 255, 0.48)",
-    dashArrayX: [1, 0],
-    dashArrayY: [5, 3],
-    rotation: -Math.PI / 4,
-  },
-  sp500: {
-    symbol: "circle",
-    symbolSize: 0.9,
-    color: "rgba(255, 255, 255, 0.58)",
-    dashArrayX: [1, 5],
-    dashArrayY: [1, 5],
-  },
-  nasdaq: {
-    symbol: "diamond",
-    symbolSize: 0.9,
-    color: "rgba(255, 255, 255, 0.58)",
-    dashArrayX: [1, 5],
-    dashArrayY: [1, 5],
-  },
-  policyBankBond: {
-    symbol: "rect",
-    symbolSize: 1,
-    color: "rgba(255, 255, 255, 0.48)",
-    dashArrayX: [1, 0],
-    dashArrayY: [4, 4],
-  },
-  gold: {
-    symbol: "triangle",
-    symbolSize: 0.9,
-    color: "rgba(255, 255, 255, 0.55)",
-    dashArrayX: [1, 5],
-    dashArrayY: [1, 5],
-  },
-  soymeal: {
-    symbol: "rect",
-    symbolSize: 1,
-    color: "rgba(255, 255, 255, 0.48)",
-    dashArrayX: [1, 0],
-    dashArrayY: [5, 3],
-    rotation: Math.PI / 2,
-  },
-  cash: {
-    symbol: ["rect", "circle"],
-    symbolSize: 0.75,
-    color: "rgba(255, 255, 255, 0.52)",
-    dashArrayX: [[1, 4], [1, 4]],
-    dashArrayY: [3, 3],
-    rotation: Math.PI / 4,
-  },
+const PIE_COLORS: Record<AssetKey, string> = {
+  dividend: "#D95F59",
+  sp500: "#356D93",
+  nasdaq: "#63A5C5",
+  policyBankBond: "#6F9A7D",
+  gold: "#D4A536",
+  soymeal: "#B87951",
+  cash: "#A7AAA3",
 };
 
 function emptyHoldingInputs(): Record<AssetKey, string> {
@@ -176,7 +131,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
     return typeOrder[left.type] - typeOrder[right.type] || left.sequence - right.sequence;
   });
 
-  const patternPieOption = useMemo<echarts.EChartsCoreOption>(
+  const allocationPieOption = useMemo<echarts.EChartsCoreOption>(
     () => ({
       animationDuration: 450,
       tooltip: {
@@ -191,13 +146,12 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
       series: [
         {
           type: "pie",
-          radius: "82%",
+          radius: "90%",
           center: ["50%", "50%"],
           avoidLabelOverlap: true,
           selectedMode: "single",
-          selectedOffset: 7,
-          padAngle: 1,
-          itemStyle: { borderColor: "#f7f2e9", borderWidth: 3, borderRadius: 3 },
+          selectedOffset: 6,
+          itemStyle: { borderColor: "#fffaf2", borderWidth: 2 },
           label: { show: false },
           labelLine: { show: false },
           emphasis: {
@@ -210,10 +164,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
             .map((row) => ({
               name: ASSET_BY_KEY[row.key].label,
               value: Number((row.weight * 100).toFixed(6)),
-              itemStyle: {
-                color: ASSET_BY_KEY[row.key].color,
-                decal: PIE_DECALS[row.key],
-              },
+              itemStyle: { color: PIE_COLORS[row.key] },
             })),
         },
       ],
@@ -330,14 +281,14 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
         <div className="rebalance-side-column">
           <section className="panel rebalance-pie-card overflow-hidden">
             <div className="rebalance-pie-chart">
-              <EChart option={patternPieOption} className="size-full" label="资产配置占比图" />
+              <EChart option={allocationPieOption} className="size-full" label="资产配置占比图" />
             </div>
             <div className="rebalance-pie-legend">
               {allocations.map((row) => {
                 const asset = ASSET_BY_KEY[row.key];
                 return (
                   <div key={row.key} className="rebalance-pie-legend-item">
-                    <span className="asset-dot" style={{ backgroundColor: asset.color }} />
+                    <span className="asset-dot" style={{ backgroundColor: PIE_COLORS[row.key] }} />
                     <span className="rebalance-pie-legend-name">{asset.label}</span>
                     <span className="rebalance-pie-legend-value">{formatPercent(row.weight, 1)}</span>
                   </div>
