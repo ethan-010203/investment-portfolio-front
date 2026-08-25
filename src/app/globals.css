@@ -192,7 +192,7 @@ select:focus-visible {
 
 .site-brand-loader {
   position: absolute;
-  top: 50%;
+  top: calc(50% - 9px);
   left: 50%;
   width: 75px;
   height: 100px;
