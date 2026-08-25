@@ -34,26 +34,18 @@ const PIE_COLORS: Record<AssetKey, string> = {
   cash: "#A7AAA3",
 };
 
-function createPiePattern(color: string) {
-  const texture = `<svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 42 42">
-    <rect width="42" height="42" fill="${color}"/>
-    <g fill="none" stroke="#fff" stroke-opacity=".22" stroke-width=".85" stroke-linecap="round">
-      <path d="M-10 8 8-10M-6 20 20-6M-4 34 34-4M6 44 44 6M20 48 48 20"/>
-      <path d="M-6 14C7 11 18 16 48 8M-4 30C11 25 27 33 48 24M2 43C14 38 30 43 47 37"/>
-    </g>
-    <g fill="none" stroke="#1f2937" stroke-opacity=".11" stroke-width=".7" stroke-linecap="round">
-      <path d="M-8 5 37 50M4-7 50 39M-5 24C10 19 29 24 48 17"/>
-    </g>
-  </svg>`;
-  return {
-    image: `data:image/svg+xml,${encodeURIComponent(texture)}`,
-    repeat: "repeat" as const,
-  };
-}
-
-const PIE_PATTERNS = Object.fromEntries(
-  ASSETS.map((asset) => [asset.key, createPiePattern(PIE_COLORS[asset.key])]),
-) as Record<AssetKey, ReturnType<typeof createPiePattern>>;
+const PIE_TEXTURE = {
+  symbol: ["rect", "rect", "circle"],
+  symbolSize: 0.55,
+  symbolKeepAspect: true,
+  color: "rgba(34, 42, 46, 0.2)",
+  backgroundColor: "rgba(255, 255, 255, 0.05)",
+  dashArrayX: [[1, 1, 2, 1], [2, 0.8, 1, 1.2], [1.3, 0.7]],
+  dashArrayY: [1, 1.2, 0.8, 1.4],
+  rotation: -Math.PI / 8,
+  maxTileWidth: 96,
+  maxTileHeight: 96,
+};
 
 function emptyHoldingInputs(): Record<AssetKey, string> {
   return ASSETS.reduce(
@@ -202,7 +194,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
             .map((row) => ({
               name: ASSET_BY_KEY[row.key].label,
               value: Number((row.weight * 100).toFixed(6)),
-              itemStyle: { color: PIE_PATTERNS[row.key] },
+              itemStyle: { color: PIE_COLORS[row.key], decal: PIE_TEXTURE },
               labelLine: { lineStyle: { color: PIE_COLORS[row.key] } },
             })),
         },
