@@ -1,6 +1,6 @@
 "use client";
 
-import { ChartNoAxesCombined, LineChart, RefreshCw } from "lucide-react";
+import { LineChart, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -19,9 +19,7 @@ export function SiteHeader() {
     <header className="site-header sticky top-0 z-50 bg-[rgb(247_245_239_/_82%)] px-4 py-3 backdrop-blur-xl">
       <div className={`site-header-inner mx-auto flex h-16 w-[min(1480px,100%)] items-center justify-between gap-5 rounded-full bg-[rgb(255_253_248_/_74%)] px-4 shadow-[0_10px_30px_rgb(61_65_61_/_5%)] ${showDateRange ? "site-header-with-date-range" : ""}`}>
         <Link href="/net-value" className="site-brand flex items-center gap-2.5 px-2 font-semibold" aria-label="投资组合每日净值">
-          <span className="site-brand-icon grid size-9 place-items-center rounded-full bg-[#1d516f] text-[#f9fcfb] shadow-[0_5px_12px_rgb(29_81_111_/_20%)]">
-            <ChartNoAxesCombined size={17} strokeWidth={2} />
-          </span>
+          <BrandLoader />
           <span className="site-brand-label">投资组合</span>
         </Link>
 
@@ -46,5 +44,20 @@ export function SiteHeader() {
         </nav>
       </div>
     </header>
+  );
+}
+
+function BrandLoader() {
+  return (
+    <span className="site-brand-loader-frame" aria-hidden="true">
+      <span className="site-brand-loader">
+        <span className="site-brand-loader-bar" />
+        <span className="site-brand-loader-bar" />
+        <span className="site-brand-loader-bar" />
+        <span className="site-brand-loader-bar" />
+        <span className="site-brand-loader-bar" />
+        <span className="site-brand-loader-ball" />
+      </span>
+    </span>
   );
 }
