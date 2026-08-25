@@ -49,9 +49,14 @@ export type PortfolioDataset = {
 
 export type PortfolioMetrics = {
   cumulativeNav: number;
-  latestReturn: number;
   annualizedReturn: number;
+  annualizedVolatility: number;
+  sharpeRatio: number;
+  calmarRatio: number;
   maximumDrawdown: number;
+  maximumDrawdownDurationDays: number;
+  maximumDrawdownStartDate: string;
+  maximumDrawdownEndDate: string;
   latestDate: string;
 };
 

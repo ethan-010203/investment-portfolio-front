@@ -122,6 +122,14 @@ select:focus-visible {
   font-size: 1.15rem;
 }
 
+.metric-detail {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
 .net-value-sidebar .metric-card:first-child {
   padding-top: 0 !important;
 }

@@ -7,7 +7,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { EChart } from "@/components/echart";
 import { ASSETS, type AssetKey } from "@/lib/assets";
 import { buildSelectedCurve } from "@/lib/factor-curve";
-import { formatNumber, formatPercent, returnTone } from "@/lib/format";
+import { formatDate, formatNumber, formatPercent, returnTone } from "@/lib/format";
 import { calculateMetrics } from "@/lib/metrics";
 import type { NavSeriesRecord } from "@/lib/types";
 
@@ -230,9 +230,16 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
       <aside className="net-value-sidebar">
         <div className="net-value-metrics">
           <Metric label="累计净值" value={formatNumber(metrics.cumulativeNav, 4)} />
-          <Metric label="区间末日收益" value={formatPercent(metrics.latestReturn)} tone={returnTone(metrics.latestReturn)} />
           <Metric label="区间年化" value={formatPercent(metrics.annualizedReturn)} tone={returnTone(metrics.annualizedReturn)} />
+          <Metric label="年化波动率" value={formatPercent(metrics.annualizedVolatility)} />
+          <Metric label="夏普比率" value={formatNumber(metrics.sharpeRatio, 2)} tone={returnTone(metrics.sharpeRatio)} />
+          <Metric label="卡玛比率" value={formatNumber(metrics.calmarRatio, 2)} tone={returnTone(metrics.calmarRatio)} />
           <Metric label="区间最大回撤" value={formatPercent(metrics.maximumDrawdown)} tone="negative" />
+          <Metric
+            label="最大回撤天数"
+            value={`${metrics.maximumDrawdownDurationDays} 天`}
+            detail={`${formatDate(metrics.maximumDrawdownStartDate)} - ${formatDate(metrics.maximumDrawdownEndDate)}`}
+          />
         </div>
 
         <div className="net-value-sidebar-controls">
@@ -304,11 +311,22 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
   );
 }
 
-function Metric({ label, value, tone = "neutral" }: { label: string; value: string; tone?: "positive" | "negative" | "neutral" }) {
+function Metric({
+  label,
+  value,
+  detail,
+  tone = "neutral",
+}: {
+  label: string;
+  value: string;
+  detail?: string;
+  tone?: "positive" | "negative" | "neutral";
+}) {
   return (
     <div className="metric-card px-6 py-6 max-[520px]:px-4">
       <div className="text-xs text-[var(--muted)]">{label}</div>
       <div className={`mt-2 font-mono text-2xl font-semibold tabular-nums max-[520px]:text-xl ${tone}`}>{value}</div>
+      {detail && <div className="metric-detail">{detail}</div>}
     </div>
   );
 }
