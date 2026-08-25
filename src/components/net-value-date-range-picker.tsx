@@ -49,16 +49,13 @@ export function NetValueDateRangePicker() {
   const ready = Boolean(effectiveRange && firstDate && lastDate);
 
   const selectedRange = useMemo<DateRange | undefined>(() => {
-    if (pendingFrom) {
-      const pendingDate = parseIsoDate(pendingFrom);
-      return { from: pendingDate, to: pendingDate };
-    }
     if (!effectiveRange) return undefined;
     return {
       from: parseIsoDate(effectiveRange.from),
       to: parseIsoDate(effectiveRange.to),
     };
-  }, [effectiveRange, pendingFrom]);
+  }, [effectiveRange]);
+  const pendingDate = pendingFrom ? parseIsoDate(pendingFrom) : undefined;
 
   const visibleYear = visibleMonth.getFullYear();
   const visibleMonthIndex = visibleMonth.getMonth();
@@ -236,7 +233,11 @@ export function NetValueDateRangePicker() {
               {view === "day" && (
                 <Calendar
                   mode="range"
-                  selected={selectedRange}
+                  selected={pendingDate ? undefined : selectedRange}
+                  modifiers={pendingDate ? { pendingStart: pendingDate } : undefined}
+                  modifiersClassNames={{
+                    pendingStart: "[&_button]:bg-[#1d516f] [&_button]:text-white [&_button]:hover:bg-[#1d516f]",
+                  }}
                   month={visibleMonth}
                   onMonthChange={setVisibleMonth}
                   startMonth={parseIsoDate(firstDate!)}
