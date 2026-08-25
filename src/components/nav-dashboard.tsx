@@ -258,13 +258,11 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
                 label="累计净值"
                 value={formatNumber(metrics.cumulativeNav, 4)}
                 tone={returnTone(metrics.cumulativeNav - 1)}
-                status={metrics.cumulativeNav >= 1 ? "up" : "down"}
               />
               <Metric
                 label="区间年化"
                 value={formatPercent(metrics.annualizedReturn)}
                 tone={returnTone(metrics.annualizedReturn)}
-                status={metrics.annualizedReturn >= 0 ? "up" : "down"}
               />
               <Metric
                 label="年化波动率"
@@ -274,19 +272,16 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
                 label="夏普比率"
                 value={formatNumber(metrics.sharpeRatio, 2)}
                 tone={returnTone(metrics.sharpeRatio)}
-                status={metrics.sharpeRatio >= 0 ? "up" : "down"}
               />
               <Metric
                 label="卡玛比率"
                 value={formatNumber(metrics.calmarRatio, 2)}
                 tone={returnTone(metrics.calmarRatio)}
-                status={metrics.calmarRatio >= 0 ? "up" : "down"}
               />
               <Metric
                 label="区间最大回撤"
                 value={formatPercent(metrics.maximumDrawdown)}
                 tone="negative"
-                status="down"
               />
               <Metric
                 className="metric-card-wide"
@@ -356,14 +351,12 @@ function Metric({
   value,
   detail,
   tone = "neutral",
-  status,
 }: {
   className?: string;
   label: string;
   value: string;
   detail?: string;
   tone?: "positive" | "negative" | "neutral";
-  status?: "up" | "down";
 }) {
   return (
     <div className={`metric-card ${className}`}>
@@ -372,21 +365,8 @@ function Metric({
       </div>
       <div className={`metric-value-row font-mono font-semibold tabular-nums ${tone}`}>
         <span>{value}</span>
-        {status && <TrendArrow direction={status} />}
       </div>
       {detail && <div className="metric-detail">{detail}</div>}
     </div>
-  );
-}
-
-function TrendArrow({ direction }: { direction: "up" | "down" }) {
-  return (
-    <svg
-      className={`metric-trend-arrow metric-trend-${direction}`}
-      viewBox="0 0 1792 1792"
-      aria-hidden="true"
-    >
-      <path d="M1408 1216q0 26-19 45t-45 19H448q-26 0-45-19t-19-45 19-45l448-448q19-19 45-19t45 19l448 448q19 19 19 45z" />
-    </svg>
   );
 }

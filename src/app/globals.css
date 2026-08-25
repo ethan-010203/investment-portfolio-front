@@ -219,25 +219,8 @@ select:focus-visible {
   line-height: 1.1;
 }
 
-.net-value-sidebar .metric-value-row,
-.net-value-sidebar .metric-trend-arrow {
+.net-value-sidebar .metric-value-row {
   color: var(--ink);
-}
-
-.metric-trend-arrow {
-  width: 16px;
-  height: 16px;
-  flex: 0 0 16px;
-  fill: currentColor;
-}
-
-.metric-trend-up {
-  color: var(--positive);
-}
-
-.metric-trend-down {
-  color: var(--negative);
-  transform: rotate(180deg);
 }
 
 .metric-detail {
@@ -1131,12 +1114,6 @@ header nav a:not([aria-current="page"]) {
   .metric-value-row {
     margin-top: 6px;
     font-size: 20px;
-  }
-
-  .metric-trend-arrow {
-    width: 15px;
-    height: 15px;
-    flex-basis: 15px;
   }
 
   .metric-detail {
