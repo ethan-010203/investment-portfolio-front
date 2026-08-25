@@ -4,6 +4,8 @@ import { ChartNoAxesCombined, LineChart, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { NetValueDateRangePicker } from "@/components/net-value-date-range-picker";
+
 const NAV_ITEMS = [
   { href: "/net-value", label: "每日净值", icon: LineChart },
   { href: "/rebalance", label: "调仓计算", icon: RefreshCw },
@@ -11,16 +13,19 @@ const NAV_ITEMS = [
 
 export function SiteHeader() {
   const pathname = usePathname();
+  const showDateRange = pathname.startsWith("/net-value");
 
   return (
     <header className="site-header sticky top-0 z-50 bg-[rgb(247_245_239_/_82%)] px-4 py-3 backdrop-blur-xl">
-      <div className="site-header-inner mx-auto flex h-16 w-[min(1480px,100%)] items-center justify-between gap-5 rounded-full bg-[rgb(255_253_248_/_74%)] px-4 shadow-[0_10px_30px_rgb(61_65_61_/_5%)]">
+      <div className={`site-header-inner mx-auto flex h-16 w-[min(1480px,100%)] items-center justify-between gap-5 rounded-full bg-[rgb(255_253_248_/_74%)] px-4 shadow-[0_10px_30px_rgb(61_65_61_/_5%)] ${showDateRange ? "site-header-with-date-range" : ""}`}>
         <Link href="/net-value" className="site-brand flex items-center gap-2.5 px-2 font-semibold" aria-label="投资组合每日净值">
           <span className="site-brand-icon grid size-9 place-items-center rounded-full bg-[#1d516f] text-[#f9fcfb] shadow-[0_5px_12px_rgb(29_81_111_/_20%)]">
             <ChartNoAxesCombined size={17} strokeWidth={2} />
           </span>
           <span className="site-brand-label">投资组合</span>
         </Link>
+
+        {showDateRange && <NetValueDateRangePicker />}
 
         <nav className="site-navigation flex items-center gap-1 rounded-full bg-[#eef0ed] p-1" aria-label="主导航">
           {NAV_ITEMS.map((item) => {

@@ -4,8 +4,10 @@ import * as echarts from "echarts";
 import { useEffect, useMemo, useState } from "react";
 
 import { EChart } from "@/components/echart";
+import { useNetValueDateRange } from "@/components/net-value-date-range-context";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { ASSETS, type AssetKey } from "@/lib/assets";
+import { filterRowsByDateRange } from "@/lib/date-range";
 import { buildSelectedCurve } from "@/lib/factor-curve";
 import { formatDate, formatNumber, formatPercent, returnTone } from "@/lib/format";
 import { calculateDrawdownDurationSeries, calculateMetrics } from "@/lib/metrics";
@@ -34,6 +36,11 @@ function initialSelectedAssets(): AssetKey[] {
 export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
   const [selectedAssets, setSelectedAssets] = useState<AssetKey[]>(initialSelectedAssets);
   const isMobile = useMediaQuery("(max-width: 720px)");
+  const { effectiveRange, hasCustomRange, registerAvailableDates } = useNetValueDateRange();
+
+  useEffect(() => {
+    registerAvailableDates(rows.map((row) => row.date));
+  }, [registerAvailableDates, rows]);
 
   useEffect(() => {
     try {
@@ -43,7 +50,10 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
     }
   }, [selectedAssets]);
 
-  const seriesRows = rows;
+  const seriesRows = useMemo(
+    () => filterRowsByDateRange(rows, effectiveRange),
+    [effectiveRange, rows],
+  );
 
   const selectedCurveRows = useMemo(
     () => buildSelectedCurve(seriesRows, selectedAssets),
@@ -95,7 +105,7 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
         {
           type: "inside",
           xAxisIndex: 0,
-          start: Math.max(0, 100 - (30 / Math.max(selectedCurveRows.length, 30)) * 100),
+          start: hasCustomRange ? 0 : Math.max(0, 100 - (30 / Math.max(selectedCurveRows.length, 30)) * 100),
           end: 100,
           zoomOnMouseWheel: true,
           moveOnMouseMove: true,
@@ -160,7 +170,7 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
         },
       ],
     }),
-    [drawdownDurationSeries, isMobile, selectedCurveRows],
+    [drawdownDurationSeries, hasCustomRange, isMobile, selectedCurveRows],
   );
 
   const barChartOption = useMemo<echarts.EChartsCoreOption>(
@@ -187,7 +197,7 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
         {
           type: "inside",
           xAxisIndex: 0,
-          start: Math.max(0, 100 - (30 / Math.max(selectedCurveRows.length, 30)) * 100),
+          start: hasCustomRange ? 0 : Math.max(0, 100 - (30 / Math.max(selectedCurveRows.length, 30)) * 100),
           end: 100,
           zoomOnMouseWheel: true,
           moveOnMouseMove: true,
@@ -256,7 +266,7 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
         },
       ],
     }),
-    [isMobile, selectedCurveRows],
+    [hasCustomRange, isMobile, selectedCurveRows],
   );
 
   function toggleAsset(key: AssetKey) {

@@ -1,4 +1,8 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
 
 :root {
   --background: #f7f5ef;
@@ -6,6 +10,7 @@
   --surface-strong: #ffffff;
   --foreground: #202124;
   --muted: #777875;
+  --shadcn-muted: #eef0ed;
   --line: transparent;
   --line-strong: transparent;
   --blue: #2f6288;
@@ -23,6 +28,35 @@
   --scrollbar-thumb-hover: rgb(47 50 48 / 64%);
   --shadow: 0 16px 44px rgb(61 65 61 / 7%);
   --shadow-hover: 0 18px 52px rgb(61 65 61 / 12%);
+  --card: #fffdf8;
+  --card-foreground: #202124;
+  --popover: #fffdf8;
+  --popover-foreground: #202124;
+  --primary: #164b70;
+  --primary-foreground: #f9fcfb;
+  --secondary: #eef0ed;
+  --secondary-foreground: #202124;
+  --muted-foreground: #777875;
+  --accent: #e8f3f7;
+  --accent-foreground: #202124;
+  --destructive: #b93e37;
+  --border: #dfe3df;
+  --input: #dfe3df;
+  --ring: #6e97ae;
+  --chart-1: #2f6288;
+  --chart-2: #16805f;
+  --chart-3: #c8483f;
+  --chart-4: #caa83e;
+  --chart-5: #7c6fa8;
+  --radius: 0.875rem;
+  --sidebar: #fffdf8;
+  --sidebar-foreground: #202124;
+  --sidebar-primary: #164b70;
+  --sidebar-primary-foreground: #f9fcfb;
+  --sidebar-accent: #eef0ed;
+  --sidebar-accent-foreground: #202124;
+  --sidebar-border: #dfe3df;
+  --sidebar-ring: #6e97ae;
 }
 
 @theme inline {
@@ -30,6 +64,44 @@
   --color-foreground: var(--foreground);
   --font-sans: "Inter", "SF Pro Display", "SF Pro Text", "PingFang SC",
     "Microsoft YaHei", system-ui, sans-serif;
+  --font-heading: "Inter", "SF Pro Display", "SF Pro Text", "PingFang SC",
+    "Microsoft YaHei", system-ui, sans-serif;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--shadcn-muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
 * {
@@ -107,6 +179,19 @@ select:focus-visible {
   width: min(1480px, calc(100% - 48px));
   margin: 0 auto;
   padding: 20px 0 24px;
+}
+
+.net-value-date-range {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.net-value-date-trigger {
+  min-width: 144px;
 }
 
 .net-value-page {
@@ -1024,12 +1109,28 @@ header nav a:not([aria-current="page"]) {
     padding: 6px;
   }
 
+  .site-header-inner.site-header-with-date-range {
+    display: grid;
+    height: auto;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "brand navigation"
+      "date-range date-range";
+    row-gap: 7px;
+    border-radius: 20px;
+    padding: 6px;
+  }
+
   .site-brand {
     min-width: 0;
     gap: 7px;
     padding: 0 3px;
     font-size: 14px;
     white-space: nowrap;
+  }
+
+  .site-header-with-date-range .site-brand {
+    grid-area: brand;
   }
 
   .site-brand-icon {
@@ -1043,6 +1144,28 @@ header nav a:not([aria-current="page"]) {
     flex: 1 1 auto;
     justify-content: stretch;
     padding: 3px;
+  }
+
+  .site-header-with-date-range .site-navigation {
+    grid-area: navigation;
+  }
+
+  .net-value-date-range {
+    grid-area: date-range;
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    margin: 0;
+  }
+
+  .net-value-date-trigger {
+    width: 100%;
+    min-width: 0;
+    height: 39px;
+    gap: 6px;
+    padding: 0 9px;
+    font-size: 12px;
   }
 
   .site-navigation-link {
@@ -1501,5 +1624,17 @@ header nav a:not([aria-current="page"]) {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
   }
 }

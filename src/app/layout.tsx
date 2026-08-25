@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { NetValueDateRangeProvider } from "@/components/net-value-date-range-context";
 import { PortfolioDataCacheWarmer } from "@/components/portfolio-data-warmer";
 import { SiteHeader } from "@/components/site-header";
 
@@ -17,9 +18,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="zh-CN" className="h-full antialiased">
       <body className="min-h-full">
-        <PortfolioDataCacheWarmer />
-        <SiteHeader />
-        <main className="page-shell">{children}</main>
+        <NetValueDateRangeProvider>
+          <PortfolioDataCacheWarmer />
+          <SiteHeader />
+          <main className="page-shell">{children}</main>
+        </NetValueDateRangeProvider>
       </body>
     </html>
   );
