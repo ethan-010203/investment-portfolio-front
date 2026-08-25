@@ -369,6 +369,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
                 );
               })}
             </div>
+            <StrategyDisclaimer />
           </section>
         )}
 
@@ -605,6 +606,15 @@ function HistoryRebalanceTable({
           </button>
         </div>
       </div>
+      <StrategyDisclaimer />
     </section>
+  );
+}
+
+function StrategyDisclaimer() {
+  return (
+    <p className="strategy-disclaimer" role="note">
+      策略仅供个人研究，不构成任何投资建议。非专业投资人员请勿据此进行投资决策或实盘交易。投资有风险，入市需谨慎。
+    </p>
   );
 }
