@@ -259,7 +259,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
               onClear={clearHoldings}
             />
             <div className="rebalance-table-scroll overflow-x-auto">
-            <table className="rebalance-calculation-table w-full min-w-[720px] border-collapse text-left">
+            <table className="rebalance-calculation-table w-full min-w-[720px] border-collapse">
               <colgroup>
                 <col className="rebalance-asset-column" />
                 <col className="rebalance-holding-column" />
@@ -268,10 +268,10 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
               </colgroup>
               <thead>
                 <tr className="border-b border-[var(--line)] text-[var(--muted)]">
-                  <th className="px-6 py-3 font-medium">资产</th>
-                  <th className="px-4 py-3 text-right font-medium">持有金额</th>
-                  <th className="px-4 py-3 text-right font-medium">当前策略占比</th>
-                  <th className="px-6 py-3 text-right font-medium">调仓建议</th>
+                  <th className="px-4 py-3 text-center font-medium">资产</th>
+                  <th className="px-4 py-3 text-center font-medium">持有金额</th>
+                  <th className="px-4 py-3 text-center font-medium">当前策略占比</th>
+                  <th className="px-4 py-3 text-center font-medium">调仓建议</th>
                 </tr>
               </thead>
               <tbody>
@@ -286,8 +286,8 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
                       : `卖出 ${formatCurrency(Math.abs(difference))}`;
                   return (
                     <tr key={row.key} className="table-row border-b border-[var(--line)] last:border-0">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
+                      <td className="px-4 py-4 text-center">
+                        <div className="inline-flex items-center justify-center gap-3 text-left">
                           <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: asset.color }} />
                           <div>
                             <div className="rebalance-asset-code font-mono text-[var(--muted)]">{asset.code}</div>
@@ -295,8 +295,8 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="relative ml-auto w-full max-w-[172px]">
+                      <td className="px-4 py-3 text-center">
+                        <div className="relative mx-auto w-full max-w-[172px]">
                           <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-xs text-[var(--muted)]">¥</span>
                           <input
                             type="text"
@@ -310,8 +310,8 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
                           />
                         </div>
                       </td>
-                      <td className="rebalance-strategy-weight px-4 py-4 text-right font-mono font-medium tabular-nums">{formatPercent(row.weight)}</td>
-                      <td aria-live="polite" className={`rebalance-advice px-6 py-4 text-right font-mono font-semibold tabular-nums ${difference > tradeThreshold ? "positive" : difference < -tradeThreshold ? "negative" : "neutral"}`}>
+                      <td className="rebalance-strategy-weight px-4 py-4 text-center font-mono font-medium tabular-nums">{formatPercent(row.weight)}</td>
+                      <td aria-live="polite" className={`rebalance-advice px-4 py-4 text-center font-mono font-semibold tabular-nums ${difference > tradeThreshold ? "positive" : difference < -tradeThreshold ? "negative" : "neutral"}`}>
                         {action}
                       </td>
                     </tr>

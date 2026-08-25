@@ -557,24 +557,16 @@ header nav a:not([aria-current="page"]) {
   table-layout: fixed;
 }
 
-.rebalance-calculation-table .rebalance-asset-column {
-  width: 36%;
-}
-
-.rebalance-calculation-table .rebalance-holding-column {
-  width: 24%;
-}
-
-.rebalance-calculation-table .rebalance-weight-column {
-  width: 18%;
-}
-
+.rebalance-calculation-table .rebalance-asset-column,
+.rebalance-calculation-table .rebalance-holding-column,
+.rebalance-calculation-table .rebalance-weight-column,
 .rebalance-calculation-table .rebalance-advice-column {
-  width: 22%;
+  width: 25%;
 }
 
 .rebalance-calculation-table thead {
-  font-size: 13px;
+  font-size: 15px;
+  font-weight: 650;
 }
 
 .rebalance-asset-code {
