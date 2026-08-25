@@ -583,6 +583,13 @@ header nav a:not([aria-current="page"]) {
   gap: 14px;
 }
 
+.rebalance-data-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.save-data-button,
 .clear-data-button {
   display: inline-flex;
   min-height: 38px;
@@ -599,11 +606,25 @@ header nav a:not([aria-current="page"]) {
   transition: background 160ms ease, color 160ms ease, opacity 160ms ease;
 }
 
+.save-data-button {
+  background: var(--blue-deep);
+  color: #fff;
+}
+
+.save-data-button:hover:not(:disabled) {
+  background: #215b84;
+}
+
+.save-data-button-error {
+  background: var(--negative);
+}
+
 .clear-data-button:hover:not(:disabled) {
   background: #e3e8e5;
   color: var(--foreground);
 }
 
+.save-data-button:disabled,
 .clear-data-button:disabled {
   cursor: not-allowed;
   opacity: 0.42;
