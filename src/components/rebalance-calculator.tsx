@@ -322,43 +322,45 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
             </div>
           </section>
 
-          <aside className="panel risk-card h-fit overflow-hidden">
-          <div className="border-b border-[var(--line)] px-5 py-5">
-            <h2 className="text-lg font-semibold">本期事件</h2>
-          </div>
-          <div className="event-timeline-scroll">
-            <div className="event-timeline">
-              {orderedCycleEvents.map((event, index) => (
-                <article key={event.id} className="event-timeline-item">
-                  <div className="event-timeline-axis" aria-hidden="true">
-                    <span className={`event-timeline-node ${event.type === "正式调仓" ? "event-timeline-node-formal" : "event-timeline-node-risk"}`} />
-                    {index < orderedCycleEvents.length - 1 && <span className="event-timeline-line" />}
-                  </div>
-                  <div className="event-timeline-content">
-                    <div className="event-timeline-heading">
-                      <span>{event.type}</span>
-                      <time dateTime={event.executionDate}>{formatDate(event.executionDate)}</time>
-                    </div>
-                    <p className="event-timeline-description">{event.asset} · {event.reason}</p>
-                    <div className="event-adjustment-list">
-                      {event.adjustments.map((adjustment) => (
-                        <div key={adjustment.asset} className="event-adjustment-row">
-                          <span
-                            className="event-adjustment-dot"
-                            style={{ backgroundColor: EVENT_ASSET_COLORS[adjustment.asset] ?? "#8b918c" }}
-                          />
-                          <span>
-                            {adjustment.asset}由 <strong>{formatPercent(adjustment.beforeWeight)}</strong> 调至 <strong>{formatPercent(adjustment.afterWeight)}</strong>
-                          </span>
+          <aside className="risk-card">
+            <div className="risk-card-body">
+              <div className="risk-card-header">
+                <h2>本期事件</h2>
+              </div>
+              <div className="event-timeline-scroll">
+                <div className="event-timeline">
+                  {orderedCycleEvents.map((event, index) => (
+                    <article key={event.id} className="event-timeline-item">
+                      <div className="event-timeline-axis" aria-hidden="true">
+                        <span className={`event-timeline-node ${event.type === "正式调仓" ? "event-timeline-node-formal" : "event-timeline-node-risk"}`} />
+                        {index < orderedCycleEvents.length - 1 && <span className="event-timeline-line" />}
+                      </div>
+                      <div className="event-timeline-content">
+                        <div className="event-timeline-heading">
+                          <span>{event.type}</span>
+                          <time dateTime={event.executionDate}>{formatDate(event.executionDate)}</time>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                </article>
-              ))}
-              {orderedCycleEvents.length === 0 && <div className="text-sm text-[var(--muted)]">暂无本期事件</div>}
+                        <p className="event-timeline-description">{event.asset} · {event.reason}</p>
+                        <div className="event-adjustment-list">
+                          {event.adjustments.map((adjustment) => (
+                            <div key={adjustment.asset} className="event-adjustment-row">
+                              <span
+                                className="event-adjustment-dot"
+                                style={{ backgroundColor: EVENT_ASSET_COLORS[adjustment.asset] ?? "#8b918c" }}
+                              />
+                              <span>
+                                {adjustment.asset}由 <strong>{formatPercent(adjustment.beforeWeight)}</strong> 调至 <strong>{formatPercent(adjustment.afterWeight)}</strong>
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                  {orderedCycleEvents.length === 0 && <div className="text-sm text-[var(--muted)]">暂无本期事件</div>}
+                </div>
+              </div>
             </div>
-          </div>
           </aside>
         </div>
       </div>
