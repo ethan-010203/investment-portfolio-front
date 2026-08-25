@@ -461,16 +461,48 @@ header nav a:not([aria-current="page"]) {
 }
 
 .rebalance-pie-card {
-  display: grid;
+  display: flex;
   min-height: 0;
-  place-items: center;
+  flex-direction: column;
+  justify-content: center;
+  padding: 14px 18px 16px;
   background: var(--surface);
 }
 
 .rebalance-pie-chart {
   position: relative;
-  width: min(100%, 240px);
+  width: min(100%, 180px);
   aspect-ratio: 1;
+  margin: 0 auto;
+}
+
+.rebalance-pie-legend {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px 16px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.rebalance-pie-legend-item {
+  display: grid;
+  grid-template-columns: 8px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: 11px;
+}
+
+.rebalance-pie-legend-name {
+  overflow: hidden;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rebalance-pie-legend-value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
 }
 
 .rebalance-total {

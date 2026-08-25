@@ -182,6 +182,18 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
             <div className="rebalance-pie-chart">
               <EChart option={donutOption} className="size-full" label="资产配置占比图" />
             </div>
+            <div className="rebalance-pie-legend">
+              {allocations.map((row) => {
+                const asset = ASSET_BY_KEY[row.key];
+                return (
+                  <div key={row.key} className="rebalance-pie-legend-item">
+                    <span className="asset-dot" style={{ backgroundColor: asset.color }} />
+                    <span className="rebalance-pie-legend-name">{asset.label}</span>
+                    <span className="rebalance-pie-legend-value">{formatPercent(row.weight, 1)}</span>
+                  </div>
+                );
+              })}
+            </div>
           </section>
 
           <aside className="panel risk-card h-fit overflow-hidden">
