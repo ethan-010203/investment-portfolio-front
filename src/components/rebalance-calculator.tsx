@@ -14,8 +14,8 @@ import type { PortfolioDataset, RebalanceEventSummary } from "@/lib/types";
 type Mode = "current" | "history";
 
 const MODE_OPTIONS = [
-  { value: "current", label: "本期调仓" },
-  { value: "history", label: "往期调仓" },
+  { value: "current", label: "本次调仓" },
+  { value: "history", label: "往期事件" },
 ] as const;
 
 const HISTORY_PAGE_SIZE = 10;
@@ -115,8 +115,11 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
 
   return (
     <div className="rebalance-page">
-      {mode === "history" ? <HistoryRebalanceTable events={dataset.events} mode={mode} onModeChange={setMode} /> : <div className="rebalance-workspace">
-        <section className="panel calculator-card rebalance-calculator-panel overflow-hidden">
+      <div className="rebalance-workspace">
+        {mode === "history" ? (
+          <HistoryRebalanceTable events={dataset.events} mode={mode} onModeChange={setMode} />
+        ) : (
+          <section className="panel calculator-card rebalance-calculator-panel overflow-hidden">
           <RebalanceModeBar mode={mode} onModeChange={setMode} totalCapital={totalCapital} />
           <div className="rebalance-table-scroll overflow-x-auto">
             <table className="w-full min-w-[860px] border-collapse text-left">
@@ -175,7 +178,8 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
               </tbody>
             </table>
           </div>
-        </section>
+          </section>
+        )}
 
         <div className="rebalance-side-column">
           <section className="panel rebalance-pie-card overflow-hidden">
@@ -220,7 +224,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
           </div>
           </aside>
         </div>
-      </div>}
+      </div>
     </div>
   );
 }
