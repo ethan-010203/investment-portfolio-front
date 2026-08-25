@@ -515,7 +515,7 @@ header nav a:not([aria-current="page"]) {
 
 .rebalance-side-column {
   display: grid;
-  grid-template-rows: minmax(350px, 1.15fr) minmax(0, 0.85fr);
+  grid-template-rows: minmax(410px, 0.9fr) minmax(0, 1.1fr);
   gap: 18px;
   height: 100%;
   min-width: 0;
@@ -533,7 +533,7 @@ header nav a:not([aria-current="page"]) {
 
 .rebalance-pie-chart {
   position: relative;
-  width: min(80%, 248px);
+  width: min(100%, 300px);
   aspect-ratio: 1;
   margin: 0 auto;
 }
@@ -552,7 +552,7 @@ header nav a:not([aria-current="page"]) {
   align-items: center;
   gap: 5px;
   min-width: 0;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .rebalance-pie-legend-item .asset-dot {
@@ -570,7 +570,7 @@ header nav a:not([aria-current="page"]) {
 
 .rebalance-pie-legend-value {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11.5px;
+  font-size: 12.5px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -930,7 +930,7 @@ header nav a:not([aria-current="page"]) {
   }
 
   .rebalance-pie-card {
-    min-height: 350px;
+    min-height: 410px;
   }
 
   .history-table-card {

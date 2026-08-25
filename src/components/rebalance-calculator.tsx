@@ -146,11 +146,11 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
       series: [
         {
           type: "pie",
-          radius: "90%",
+          radius: "88%",
           center: ["50%", "50%"],
           avoidLabelOverlap: true,
           selectedMode: "single",
-          selectedOffset: 6,
+          selectedOffset: 5,
           itemStyle: { borderColor: "#fffaf2", borderWidth: 2 },
           label: { show: false },
           labelLine: { show: false },
