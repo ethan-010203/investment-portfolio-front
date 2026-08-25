@@ -90,6 +90,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
   const [mode, setMode] = useState<Mode>("current");
   const [holdingInputs, setHoldingInputs] = useState<Record<AssetKey, string>>(emptyHoldingInputs);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saved" | "error">("idle");
+  const [rulesOpen, setRulesOpen] = useState(false);
   const isMobile = useMediaQuery("(max-width: 720px)");
 
   useEffect(() => {
@@ -395,9 +396,14 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
               <div className="risk-card-header">
                 <h2>本期事件</h2>
                 <TooltipProvider delayDuration={180}>
-                  <Tooltip>
+                  <Tooltip open={rulesOpen} onOpenChange={setRulesOpen}>
                     <TooltipTrigger asChild>
-                      <button type="button" className="event-rules-trigger" aria-label="查看调仓规则">
+                      <button
+                        type="button"
+                        className="event-rules-trigger"
+                        aria-label="查看调仓规则"
+                        onClick={() => setRulesOpen(true)}
+                      >
                         <CircleHelp size={17} strokeWidth={1.9} />
                       </button>
                     </TooltipTrigger>
@@ -405,7 +411,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
                       side="bottom"
                       align="end"
                       sideOffset={8}
-                      className="event-rules-tooltip max-w-[min(320px,calc(100vw-24px))] flex-col items-start gap-2 rounded-2xl bg-[#fffdf8] p-4 text-[#202124] shadow-[0_18px_46px_rgb(54_59_54_/_15%)] ring-1 ring-[#dedfd9] [&>svg]:bg-[#fffdf8] [&>svg]:fill-[#fffdf8]"
+                      className="event-rules-tooltip max-w-[min(320px,calc(100vw-24px))] flex-col items-start gap-2 rounded-2xl bg-[#fffdf8] p-4 text-[#202124] shadow-[0_18px_46px_rgb(54_59_54_/_15%)] ring-1 ring-[#dedfd9]"
                     >
                       <strong className="text-sm">调仓规则</strong>
                       <p>策略在交易日收盘后确认信号，本页日期为信号触发日；用户在下一交易日按最新策略比例调仓。</p>

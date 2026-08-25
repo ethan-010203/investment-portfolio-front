@@ -833,7 +833,8 @@ header nav a:not([aria-current="page"]) {
 }
 
 .event-rules-trigger:hover,
-.event-rules-trigger[aria-expanded="true"] {
+.event-rules-trigger[data-state="delayed-open"],
+.event-rules-trigger[data-state="instant-open"] {
   background: rgb(47 98 136 / 17%);
   color: #103e5c;
 }
@@ -847,6 +848,11 @@ header nav a:not([aria-current="page"]) {
 
 .event-rules-tooltip p strong {
   color: var(--foreground);
+}
+
+.event-rules-tooltip > svg {
+  background: #fffdf8 !important;
+  fill: #fffdf8 !important;
 }
 
 .event-timeline-scroll {
