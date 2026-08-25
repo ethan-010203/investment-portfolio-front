@@ -4,6 +4,7 @@ import * as echarts from "echarts";
 import { useEffect, useMemo, useState } from "react";
 
 import { EChart } from "@/components/echart";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { ASSETS, type AssetKey } from "@/lib/assets";
 import { buildSelectedCurve } from "@/lib/factor-curve";
 import { formatDate, formatNumber, formatPercent, returnTone } from "@/lib/format";
@@ -32,6 +33,7 @@ function initialSelectedAssets(): AssetKey[] {
 
 export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
   const [selectedAssets, setSelectedAssets] = useState<AssetKey[]>(initialSelectedAssets);
+  const isMobile = useMediaQuery("(max-width: 720px)");
 
   useEffect(() => {
     try {
@@ -52,13 +54,16 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
   const lineChartOption = useMemo<echarts.EChartsCoreOption>(
     () => ({
       animationDuration: 500,
-      grid: { left: 18, right: 22, top: 24, bottom: 68, containLabel: true },
+      grid: isMobile
+        ? { left: 4, right: 8, top: 18, bottom: 58, containLabel: true }
+        : { left: 18, right: 22, top: 24, bottom: 68, containLabel: true },
       tooltip: {
         trigger: "axis",
         backgroundColor: "rgba(32, 33, 36, 0.94)",
         borderWidth: 0,
         padding: [11, 13],
         borderRadius: 14,
+        confine: true,
         textStyle: { color: "#fffdf8", fontSize: 12 },
         valueFormatter: (value: unknown) => formatNumber(Number(value), 4),
         axisPointer: {
@@ -78,12 +83,12 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
         {
           type: "slider",
           xAxisIndex: 0,
-          height: 20,
-          bottom: 13,
+          height: isMobile ? 16 : 20,
+          bottom: isMobile ? 10 : 13,
           borderColor: "transparent",
           backgroundColor: "#eef2f0",
           fillerColor: "rgba(47, 98, 136, 0.16)",
-          handleSize: "115%",
+          handleSize: isMobile ? "140%" : "115%",
           handleStyle: { color: "#2f6288", borderWidth: 0 },
           moveHandleStyle: { color: "#9db8c9" },
           dataBackground: {
@@ -100,7 +105,8 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
         axisTick: { show: false },
         axisLabel: {
           color: "#85847e",
-          margin: 15,
+          margin: isMobile ? 10 : 15,
+          fontSize: isMobile ? 10 : 12,
           hideOverlap: true,
           formatter: (value: string) => value.slice(0, 7).replace("-", "."),
         },
@@ -111,7 +117,7 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
         splitNumber: 4,
         axisLine: { show: false },
         axisTick: { show: false },
-        axisLabel: { color: "#85847e", margin: 12, formatter: (value: number) => value.toFixed(2) },
+        axisLabel: { color: "#85847e", margin: isMobile ? 7 : 12, fontSize: isMobile ? 10 : 12, formatter: (value: number) => value.toFixed(2) },
         splitLine: { lineStyle: { color: "#e7ecea", width: 1 } },
       },
       series: [
@@ -122,7 +128,7 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
           showSymbol: false,
           symbol: "circle",
           smooth: 0.18,
-          lineStyle: { color: "#2f6288", width: 3, cap: "round", join: "round" },
+          lineStyle: { color: "#2f6288", width: isMobile ? 2.5 : 3, cap: "round", join: "round" },
           itemStyle: { color: "#2f6288" },
           areaStyle: {
             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
@@ -133,19 +139,22 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
         },
       ],
     }),
-    [selectedCurveRows],
+    [isMobile, selectedCurveRows],
   );
 
   const barChartOption = useMemo<echarts.EChartsCoreOption>(
     () => ({
       animationDuration: 350,
-      grid: { left: 18, right: 22, top: 18, bottom: 68, containLabel: true },
+      grid: isMobile
+        ? { left: 4, right: 8, top: 14, bottom: 58, containLabel: true }
+        : { left: 18, right: 22, top: 18, bottom: 68, containLabel: true },
       tooltip: {
         trigger: "axis",
         backgroundColor: "rgba(32, 33, 36, 0.94)",
         borderWidth: 0,
         padding: [11, 13],
         borderRadius: 14,
+        confine: true,
         textStyle: { color: "#fffdf8", fontSize: 12 },
         valueFormatter: (value: unknown) => formatPercent(Number(value)),
         axisPointer: {
@@ -165,12 +174,12 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
         {
           type: "slider",
           xAxisIndex: 0,
-          height: 20,
-          bottom: 13,
+          height: isMobile ? 16 : 20,
+          bottom: isMobile ? 10 : 13,
           borderColor: "transparent",
           backgroundColor: "#eef2f0",
           fillerColor: "rgba(47, 98, 136, 0.16)",
-          handleSize: "115%",
+          handleSize: isMobile ? "140%" : "115%",
           handleStyle: { color: "#2f6288", borderWidth: 0 },
           moveHandleStyle: { color: "#9db8c9" },
           dataBackground: {
@@ -187,7 +196,8 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
         axisTick: { show: false },
         axisLabel: {
           color: "#85847e",
-          margin: 15,
+          margin: isMobile ? 10 : 15,
+          fontSize: isMobile ? 10 : 12,
           hideOverlap: true,
           formatter: (value: string) => value.slice(0, 7).replace("-", "."),
         },
@@ -198,7 +208,7 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
         splitNumber: 4,
         axisLine: { show: false },
         axisTick: { show: false },
-        axisLabel: { color: "#85847e", margin: 12, formatter: (value: number) => formatPercent(value) },
+        axisLabel: { color: "#85847e", margin: isMobile ? 7 : 12, fontSize: isMobile ? 10 : 12, formatter: (value: number) => formatPercent(value) },
         splitLine: { lineStyle: { color: "#e7ecea", width: 1 } },
       },
       series: [
@@ -224,7 +234,7 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
         },
       ],
     }),
-    [selectedCurveRows],
+    [isMobile, selectedCurveRows],
   );
 
   function toggleAsset(key: AssetKey) {

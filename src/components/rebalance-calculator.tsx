@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { EChart } from "@/components/echart";
 import { SegmentedControl } from "@/components/segmented-control";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { allocateCapital, normalizeCapital } from "@/lib/allocation";
 import { ASSETS, ASSET_BY_KEY, type AssetKey } from "@/lib/assets";
 import { formatCurrency, formatDate, formatPercent } from "@/lib/format";
@@ -87,6 +88,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
   const [mode, setMode] = useState<Mode>("current");
   const [holdingInputs, setHoldingInputs] = useState<Record<AssetKey, string>>(emptyHoldingInputs);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saved" | "error">("idle");
+  const isMobile = useMediaQuery("(max-width: 720px)");
 
   useEffect(() => {
     let active = true;
@@ -173,8 +175,8 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
       series: [
         {
           type: "pie",
-          radius: "58%",
-          center: ["50%", "50%"],
+          radius: isMobile ? "52%" : "58%",
+          center: ["50%", isMobile ? "52%" : "50%"],
           avoidLabelOverlap: true,
           selectedMode: "single",
           selectedOffset: 5,
@@ -183,18 +185,18 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
             show: true,
             position: "outside",
             alignTo: "edge",
-            edgeDistance: 8,
+            edgeDistance: isMobile ? 5 : 8,
             bleedMargin: 0,
             distanceToLabelLine: 4,
             color: "#454844",
-            fontSize: 13,
+            fontSize: isMobile ? 12 : 13,
             fontWeight: 650,
             formatter: "{b}",
           },
           labelLine: {
             show: true,
-            length: 15,
-            length2: 10,
+            length: isMobile ? 10 : 15,
+            length2: isMobile ? 6 : 10,
             lineStyle: { width: 1.4, opacity: 0.9 },
           },
           labelLayout: { hideOverlap: false, moveOverlap: "shiftY" },
@@ -214,7 +216,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
         },
       ],
     }),
-    [strategyRows],
+    [isMobile, strategyRows],
   );
 
   function updateHolding(key: AssetKey, value: string) {
@@ -259,44 +261,102 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
               onClear={clearHoldings}
             />
             <div className="rebalance-table-scroll overflow-x-auto">
-            <table className="rebalance-calculation-table w-full min-w-[720px] border-collapse">
-              <colgroup>
-                <col className="rebalance-asset-column" />
-                <col className="rebalance-holding-column" />
-                <col className="rebalance-weight-column" />
-                <col className="rebalance-advice-column" />
-              </colgroup>
-              <thead>
-                <tr className="border-b border-[var(--line)] text-[var(--muted)]">
-                  <th className="px-6 py-3 text-left font-bold">资产</th>
-                  <th className="px-4 py-3 text-center font-bold">持有金额</th>
-                  <th className="px-4 py-3 text-center font-bold">当前策略占比</th>
-                  <th className="px-4 py-3 text-center font-bold">调仓建议</th>
-                </tr>
-              </thead>
-              <tbody>
-                {strategyRows.map((row) => {
-                  const asset = ASSET_BY_KEY[row.key];
-                  const holdingAmount = holdingAmounts[row.key];
-                  const difference = targetAmounts[row.key] - holdingAmount;
-                  const action = Math.abs(difference) <= tradeThreshold
-                    ? "持有"
-                    : difference > 0
-                      ? `买入 ${formatCurrency(difference)}`
-                      : `卖出 ${formatCurrency(Math.abs(difference))}`;
-                  return (
-                    <tr key={row.key} className="table-row border-b border-[var(--line)] last:border-0">
-                      <td className="px-6 py-4 text-left">
-                        <div className="flex items-center gap-3">
-                          <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: asset.color }} />
-                          <div>
-                            <div className="rebalance-asset-code font-mono text-[var(--muted)]">{asset.code}</div>
-                            <div className="rebalance-asset-name mt-1 font-semibold">{asset.key === "cash" ? asset.label : asset.name}</div>
+              <table className="rebalance-calculation-table w-full min-w-[720px] border-collapse">
+                <colgroup>
+                  <col className="rebalance-asset-column" />
+                  <col className="rebalance-holding-column" />
+                  <col className="rebalance-weight-column" />
+                  <col className="rebalance-advice-column" />
+                </colgroup>
+                <thead>
+                  <tr className="border-b border-[var(--line)] text-[var(--muted)]">
+                    <th className="px-6 py-3 text-left font-bold">资产</th>
+                    <th className="px-4 py-3 text-center font-bold">持有金额</th>
+                    <th className="px-4 py-3 text-center font-bold">当前策略占比</th>
+                    <th className="px-4 py-3 text-center font-bold">调仓建议</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {strategyRows.map((row) => {
+                    const asset = ASSET_BY_KEY[row.key];
+                    const holdingAmount = holdingAmounts[row.key];
+                    const difference = targetAmounts[row.key] - holdingAmount;
+                    const action = Math.abs(difference) <= tradeThreshold
+                      ? "持有"
+                      : difference > 0
+                        ? `买入 ${formatCurrency(difference)}`
+                        : `卖出 ${formatCurrency(Math.abs(difference))}`;
+                    return (
+                      <tr key={row.key} className="table-row border-b border-[var(--line)] last:border-0">
+                        <td className="px-6 py-4 text-left">
+                          <div className="flex items-center gap-3">
+                            <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: asset.color }} />
+                            <div>
+                              <div className="rebalance-asset-code font-mono text-[var(--muted)]">{asset.code}</div>
+                              <div className="rebalance-asset-name mt-1 font-semibold">{asset.key === "cash" ? asset.label : asset.name}</div>
+                            </div>
                           </div>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <div className="relative mx-auto w-full max-w-[172px]">
+                            <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-xs text-[var(--muted)]">¥</span>
+                            <input
+                              type="text"
+                              value={holdingInputs[row.key]}
+                              onChange={(event) => updateHolding(row.key, event.target.value)}
+                              inputMode="decimal"
+                              autoComplete="off"
+                              placeholder="0"
+                              className="holding-amount-input w-full pl-7"
+                              aria-label={`${asset.name}当前持有金额`}
+                            />
+                          </div>
+                        </td>
+                        <td className="rebalance-strategy-weight px-4 py-4 text-center font-mono font-medium tabular-nums">{formatPercent(row.weight)}</td>
+                        <td aria-live="polite" className={`rebalance-advice px-4 py-4 text-center font-mono font-semibold tabular-nums ${difference > tradeThreshold ? "positive" : difference < -tradeThreshold ? "negative" : "neutral"}`}>
+                          {action}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <div className="rebalance-mobile-assets">
+              {strategyRows.map((row) => {
+                const asset = ASSET_BY_KEY[row.key];
+                const holdingAmount = holdingAmounts[row.key];
+                const difference = targetAmounts[row.key] - holdingAmount;
+                const action = Math.abs(difference) <= tradeThreshold
+                  ? "持有"
+                  : difference > 0
+                    ? `买入 ${formatCurrency(difference)}`
+                    : `卖出 ${formatCurrency(Math.abs(difference))}`;
+                const tone = difference > tradeThreshold
+                  ? "positive"
+                  : difference < -tradeThreshold
+                    ? "negative"
+                    : "neutral";
+
+                return (
+                  <article key={row.key} className="rebalance-mobile-asset">
+                    <div className="rebalance-mobile-asset-heading">
+                      <div className="rebalance-mobile-asset-identity">
+                        <span className="asset-dot" style={{ backgroundColor: asset.color }} />
+                        <div>
+                          <div className="rebalance-mobile-asset-name">{asset.key === "cash" ? asset.label : asset.name}</div>
+                          <div className="rebalance-mobile-asset-code">{asset.code}</div>
                         </div>
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <div className="relative mx-auto w-full max-w-[172px]">
+                      </div>
+                      <div className="rebalance-mobile-weight">
+                        <span>当前策略占比</span>
+                        <strong>{formatPercent(row.weight)}</strong>
+                      </div>
+                    </div>
+                    <div className="rebalance-mobile-asset-controls">
+                      <label className="rebalance-mobile-input-field">
+                        <span>持有金额</span>
+                        <div className="relative w-full">
                           <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-xs text-[var(--muted)]">¥</span>
                           <input
                             type="text"
@@ -306,19 +366,17 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
                             autoComplete="off"
                             placeholder="0"
                             className="holding-amount-input w-full pl-7"
-                            aria-label={`${asset.name}当前持有金额`}
                           />
                         </div>
-                      </td>
-                      <td className="rebalance-strategy-weight px-4 py-4 text-center font-mono font-medium tabular-nums">{formatPercent(row.weight)}</td>
-                      <td aria-live="polite" className={`rebalance-advice px-4 py-4 text-center font-mono font-semibold tabular-nums ${difference > tradeThreshold ? "positive" : difference < -tradeThreshold ? "negative" : "neutral"}`}>
-                        {action}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                      </label>
+                      <div className="rebalance-mobile-advice">
+                        <span>调仓建议</span>
+                        <strong aria-live="polite" className={tone}>{action}</strong>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           </section>
         )}
@@ -494,6 +552,21 @@ function HistoryRebalanceTable({
             )}
           </tbody>
         </table>
+      </div>
+      <div className="history-mobile-list">
+        {visibleEvents.map((event) => (
+          <article key={event.id} className="history-mobile-event">
+            <div className="history-mobile-event-heading">
+              <strong>{event.type}</strong>
+              <time dateTime={event.executionDate}>{formatDate(event.executionDate)}</time>
+            </div>
+            <div className="history-mobile-event-asset">{event.asset || "组合"}</div>
+            <p>{event.reason}</p>
+          </article>
+        ))}
+        {visibleEvents.length === 0 && (
+          <div className="history-mobile-empty">暂无历史调仓事件</div>
+        )}
       </div>
       <div className="history-table-footer">
         <span>共 {orderedEvents.length} 条</span>
