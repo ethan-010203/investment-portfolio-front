@@ -34,22 +34,20 @@ const PIE_COLORS: Record<AssetKey, string> = {
   cash: "#A7AAA3",
 };
 
-const PIE_TEXTURE = {
-  symbol: ["rect", "rect", "circle"],
-  symbolSize: 0.62,
-  symbolKeepAspect: true,
-  color: "rgba(34, 42, 46, 0.2)",
-  dashArrayX: [[2, 1, 3, 1], [3, 1, 2, 1], [2, 2]],
-  dashArrayY: [2, 1, 2, 1],
-  rotation: -Math.PI / 8,
-  maxTileWidth: 96,
-  maxTileHeight: 96,
-};
-
 const PIE_TEXTURES = Object.fromEntries(
   ASSETS.map((asset) => [
     asset.key,
-    { ...PIE_TEXTURE, backgroundColor: PIE_COLORS[asset.key] },
+    {
+      symbol: "rect",
+      symbolSize: 1,
+      color: "rgba(255, 255, 255, 0.34)",
+      backgroundColor: PIE_COLORS[asset.key],
+      dashArrayX: [1, 0],
+      dashArrayY: [3, 2],
+      rotation: -Math.PI / 4,
+      maxTileWidth: 48,
+      maxTileHeight: 48,
+    },
   ]),
 );
 
