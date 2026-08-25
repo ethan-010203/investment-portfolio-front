@@ -850,11 +850,6 @@ header nav a:not([aria-current="page"]) {
   color: var(--foreground);
 }
 
-.event-rules-tooltip > svg {
-  background: #fffdf8 !important;
-  fill: #fffdf8 !important;
-}
-
 .event-timeline-scroll {
   min-height: 0;
   flex: 1 1 auto;
