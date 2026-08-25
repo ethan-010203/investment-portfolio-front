@@ -411,7 +411,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
                       side="bottom"
                       align="end"
                       sideOffset={8}
-                      showArrow={false}
+                      arrowClassName="fill-[#fffdf8]"
                       className="event-rules-tooltip max-w-[min(320px,calc(100vw-24px))] flex-col items-start gap-2 rounded-2xl bg-[#fffdf8] p-4 text-[#202124] shadow-[0_18px_46px_rgb(54_59_54_/_15%)] ring-1 ring-[#dedfd9]"
                     >
                       <strong className="text-sm">调仓规则</strong>
