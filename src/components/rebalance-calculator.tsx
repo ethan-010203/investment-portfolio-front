@@ -1,7 +1,7 @@
 "use client";
 
 import * as echarts from "echarts";
-import { CalendarDays, Check, ChevronDown, ShieldCheck } from "lucide-react";
+import { CalendarDays, ChevronDown } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { EChart } from "@/components/echart";
@@ -87,6 +87,12 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
     : [];
   const riskEvents = cycleEvents.filter((event) => event.type !== "正式调仓");
   const latestRiskEvent = riskEvents.at(-1);
+  const orderedCycleEvents = [...cycleEvents].sort((left, right) => {
+    const dateOrder = left.executionDate.localeCompare(right.executionDate);
+    if (dateOrder !== 0) return dateOrder;
+    const typeOrder = { 正式调仓: 0, 组合止损: 1, 单品种止盈: 2 } as const;
+    return typeOrder[left.type] - typeOrder[right.type] || left.sequence - right.sequence;
+  });
 
   const donutOption = useMemo<echarts.EChartsCoreOption>(
     () => ({
@@ -250,37 +256,24 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
           </section>
 
           <aside className="panel risk-card h-fit overflow-hidden">
-          <div className="flex items-center gap-3 border-b border-[var(--line)] px-5 py-5">
-            <span className="grid size-10 place-items-center rounded-full bg-[var(--blue-soft)] text-[var(--blue)]">
-              <ShieldCheck size={18} />
-            </span>
-            <div>
-              <h2 className="text-base font-semibold">风控状态</h2>
-              <div className="mt-1 text-xs text-[var(--muted)]">{formatDate(snapshot.date)}</div>
-            </div>
+          <div className="border-b border-[var(--line)] px-5 py-5">
+            <h2 className="text-base font-semibold">风控状态</h2>
           </div>
 
           <div className="border-b border-[var(--line)] px-5 py-5">
-            <div className="flex items-center gap-2 text-sm font-semibold">
-              <span className="grid size-5 place-items-center rounded-full bg-[#dcebe1] text-[var(--negative)]">
-                <Check size={12} strokeWidth={3} />
-              </span>
-              {latestRiskEvent ? "已执行风险调整" : "本周期正常运行"}
-            </div>
+            <div className="text-sm font-semibold">{latestRiskEvent ? "已执行风险调整" : "本周期正常运行"}</div>
             <dl className="mt-5 space-y-3 text-sm">
               <RiskRow label="正式调仓日" value={formalEvent ? formatDate(formalEvent.cycleDate) : "暂无"} />
-              <RiskRow label="组合止损" value={`${riskEvents.filter((event) => event.type === "组合止损").length} 次`} />
-              <RiskRow label="单品种止盈" value={`${riskEvents.filter((event) => event.type === "单品种止盈").length} 次`} />
               <RiskRow label="数据截至" value={formatDate(snapshot.dataThrough)} />
             </dl>
           </div>
 
           <div className="px-5 py-5">
-            <div className="eyebrow">近期事件</div>
+            <div className="eyebrow">本期事件</div>
             <div className="mt-4">
-              {[...eventsThroughSnapshot].reverse().slice(0, 4).map((event, index) => (
+              {orderedCycleEvents.map((event, index) => (
                 <div key={event.id} className="relative flex gap-3 pb-5 last:pb-0">
-                  {index < Math.min(3, eventsThroughSnapshot.length - 1) && <span className="absolute top-4 bottom-0 left-[5px] w-px bg-[var(--line)]" />}
+                  {index < orderedCycleEvents.length - 1 && <span className="absolute top-4 bottom-0 left-[5px] w-px bg-[var(--line)]" />}
                   <span className={`relative mt-1.5 size-[11px] shrink-0 rounded-full border-2 border-[var(--surface-strong)] ${event.type === "正式调仓" ? "bg-[var(--blue)]" : "bg-[#b58a3a]"}`} />
                   <div className="min-w-0">
                     <div className="flex items-center justify-between gap-3">
@@ -291,7 +284,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
                   </div>
                 </div>
               ))}
-              {eventsThroughSnapshot.length === 0 && <div className="text-sm text-[var(--muted)]">暂无调仓事件</div>}
+              {orderedCycleEvents.length === 0 && <div className="text-sm text-[var(--muted)]">暂无本期事件</div>}
             </div>
           </div>
           </aside>
