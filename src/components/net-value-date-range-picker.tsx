@@ -22,8 +22,8 @@ type CalendarView = "day" | "month" | "year";
 
 const PRESET_OPTIONS: ReadonlyArray<{ label: string; value: DateRangePreset }> = [
   { label: "最近一年", value: "year" },
+  { label: "最近三个月", value: "quarter" },
   { label: "最近一个月", value: "month" },
-  { label: "最近 7 天", value: "week" },
 ];
 
 const MONTHS = Array.from({ length: 12 }, (_, index) => index);
@@ -166,7 +166,7 @@ export function NetValueDateRangePicker() {
             collisionPadding={10}
             className="w-[350px] max-w-[calc(100vw-20px)] gap-0 overflow-hidden rounded-2xl bg-[#fffdf8] p-0 shadow-[0_20px_50px_rgb(49_58_53_/_16%)] ring-1 ring-[#d8ddd8]"
           >
-            <div className="flex flex-wrap items-center gap-1.5 border-b border-[#e5e7e2] px-3 py-2.5">
+            <div className="flex items-center justify-center gap-1.5 border-b border-[#e5e7e2] px-3 py-2.5">
               {PRESET_OPTIONS.map((preset) => (
                 <Button
                   key={preset.value}
@@ -308,10 +308,7 @@ export function NetValueDateRangePicker() {
               )}
             </div>
 
-            <div className="flex min-h-12 items-center justify-between gap-3 border-t border-[#e5e7e2] px-3 py-2">
-              <span className="text-xs font-medium text-[#7c8583]" aria-live="polite">
-                {pendingFrom ? "请选择结束日期" : "请选择开始日期"}
-              </span>
+            <div className="flex min-h-12 items-center justify-end border-t border-[#e5e7e2] px-3 py-2">
               <Button
                 type="button"
                 variant="ghost"

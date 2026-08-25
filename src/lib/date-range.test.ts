@@ -41,7 +41,7 @@ describe("净值日期范围", () => {
   });
 
   it("快捷范围以最新净值日期为终点并吸附到实际日期", () => {
-    const availableDates = ["2024-08-26", "2025-07-25", "2025-08-18", "2025-08-25"];
+    const availableDates = ["2024-08-26", "2025-05-26", "2025-07-25", "2025-08-25"];
 
     expect(resolvePresetDateRange(availableDates, "year")).toEqual({
       from: "2024-08-26",
@@ -51,8 +51,8 @@ describe("净值日期范围", () => {
       from: "2025-07-25",
       to: "2025-08-25",
     });
-    expect(resolvePresetDateRange(availableDates, "week")).toEqual({
-      from: "2025-08-25",
+    expect(resolvePresetDateRange(availableDates, "quarter")).toEqual({
+      from: "2025-05-26",
       to: "2025-08-25",
     });
   });

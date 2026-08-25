@@ -1,11 +1,11 @@
-import { subDays, subMonths, subYears } from "date-fns";
+import { subMonths, subYears } from "date-fns";
 
 export type DateRangeValue = {
   from: string;
   to: string;
 };
 
-export type DateRangePreset = "year" | "month" | "week";
+export type DateRangePreset = "year" | "quarter" | "month";
 
 export type DateRangeSelectionStep = {
   pendingFrom: string | null;
@@ -71,9 +71,7 @@ export function resolvePresetDateRange(
   const latestDate = parseIsoDate(to);
   const boundary = preset === "year"
     ? subYears(latestDate, 1)
-    : preset === "month"
-      ? subMonths(latestDate, 1)
-      : subDays(latestDate, 6);
+    : subMonths(latestDate, preset === "quarter" ? 3 : 1);
   const requestedFrom = formatIsoDate(boundary);
   const from = dates.find((date) => date >= requestedFrom) ?? dates[0];
 
