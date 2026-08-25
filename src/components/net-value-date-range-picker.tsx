@@ -235,6 +235,7 @@ export function NetValueDateRangePicker() {
                 <Calendar
                   mode="range"
                   selected={pendingDate ? EMPTY_DATE_RANGE : selectedRange}
+                  onSelect={() => undefined}
                   modifiers={pendingDate ? { pendingStart: pendingDate } : undefined}
                   modifiersClassNames={{
                     pendingStart: "[&_button]:bg-[#1d516f] [&_button]:text-white [&_button]:hover:bg-[#1d516f]",
