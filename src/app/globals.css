@@ -189,10 +189,6 @@ header nav a:not([aria-current="page"]) {
   background: var(--surface);
 }
 
-.table-card {
-  background: var(--surface);
-}
-
 .calculator-card {
   background: var(--surface);
 }
