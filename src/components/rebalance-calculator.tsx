@@ -1,7 +1,7 @@
 "use client";
 
 import * as echarts from "echarts";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { EChart } from "@/components/echart";
@@ -57,6 +57,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
     () => ASSETS.reduce((total, asset) => total + holdingAmounts[asset.key], 0),
     [holdingAmounts],
   );
+  const hasHoldingInputs = ASSETS.some((asset) => holdingInputs[asset.key].trim() !== "");
   const allocations = useMemo(
     () => allocateCapital(totalCapital, snapshot.weights),
     [totalCapital, snapshot],
@@ -123,7 +124,13 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
           <HistoryRebalanceTable events={dataset.events} mode={mode} onModeChange={setMode} />
         ) : (
           <section className="panel calculator-card rebalance-calculator-panel overflow-hidden">
-            <RebalanceModeBar mode={mode} onModeChange={setMode} totalCapital={totalCapital} />
+            <RebalanceModeBar
+              mode={mode}
+              onModeChange={setMode}
+              totalCapital={totalCapital}
+              canClear={hasHoldingInputs}
+              onClear={() => setHoldingInputs(emptyHoldingInputs())}
+            />
             <div className="rebalance-table-scroll overflow-x-auto">
             <table className="rebalance-calculation-table w-full min-w-[720px] border-collapse text-left">
               <colgroup>
@@ -256,18 +263,37 @@ function RebalanceModeBar({
   mode,
   onModeChange,
   totalCapital,
+  canClear,
+  onClear,
 }: {
   mode: Mode;
   onModeChange: (value: Mode) => void;
   totalCapital?: number;
+  canClear?: boolean;
+  onClear?: () => void;
 }) {
   return (
     <div className="rebalance-mode-bar">
       <SegmentedControl value={mode} options={MODE_OPTIONS} onChange={onModeChange} label="调仓周期" />
-      {totalCapital !== undefined && (
-        <div className="rebalance-total">
-          <span>总资金</span>
-          <strong>{formatCurrency(totalCapital)}</strong>
+      {(totalCapital !== undefined || onClear) && (
+        <div className="rebalance-mode-actions">
+          {totalCapital !== undefined && (
+            <div className="rebalance-total">
+              <span>总资金</span>
+              <strong>{formatCurrency(totalCapital)}</strong>
+            </div>
+          )}
+          {onClear && (
+            <button
+              type="button"
+              className="clear-data-button"
+              onClick={onClear}
+              disabled={!canClear}
+            >
+              <Trash2 size={15} strokeWidth={1.8} />
+              <span>清空数据</span>
+            </button>
+          )}
         </div>
       )}
     </div>

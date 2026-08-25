@@ -550,6 +550,39 @@ header nav a:not([aria-current="page"]) {
   white-space: nowrap;
 }
 
+.rebalance-mode-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+}
+
+.clear-data-button {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  border-radius: 13px;
+  background: #eef0ed;
+  padding: 0 13px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 650;
+  white-space: nowrap;
+  transition: background 160ms ease, color 160ms ease, opacity 160ms ease;
+}
+
+.clear-data-button:hover:not(:disabled) {
+  background: #e3e8e5;
+  color: var(--foreground);
+}
+
+.clear-data-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
 .rebalance-total strong {
   color: var(--foreground);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -874,5 +907,10 @@ header nav a:not([aria-current="page"]) {
     align-items: flex-start;
     flex-direction: column;
     gap: 10px;
+  }
+
+  .rebalance-mode-actions {
+    width: 100%;
+    justify-content: space-between;
   }
 }
