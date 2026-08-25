@@ -73,7 +73,7 @@ function readStoredSnapshot<T>(config: BrowserResourceConfig<T>): BrowserCacheSn
 
 function getSnapshot<T>(config: BrowserResourceConfig<T>): BrowserCacheSnapshot<T> | null {
   const current = snapshots.get(config.key);
-  if (current && config.validate(current.data)) return current as BrowserCacheSnapshot<T>;
+  if (current) return current as BrowserCacheSnapshot<T>;
   return readStoredSnapshot(config);
 }
 
