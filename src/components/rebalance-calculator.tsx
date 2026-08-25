@@ -1,13 +1,13 @@
 "use client";
 
 import * as echarts from "echarts";
-import { Calculator, CalendarDays, Check, ChevronDown, ShieldCheck } from "lucide-react";
-import { FormEvent, useMemo, useState } from "react";
+import { CalendarDays, Check, ChevronDown, ShieldCheck } from "lucide-react";
+import { useMemo, useState } from "react";
 
 import { EChart } from "@/components/echart";
 import { SegmentedControl } from "@/components/segmented-control";
 import { allocateCapital, normalizeCapital } from "@/lib/allocation";
-import { ASSET_BY_KEY } from "@/lib/assets";
+import { ASSETS, ASSET_BY_KEY, type AssetKey } from "@/lib/assets";
 import { formatCurrency, formatDate, formatNumber, formatPercent } from "@/lib/format";
 import type { NavRecord, PortfolioDataset, RebalanceEventSummary } from "@/lib/types";
 
@@ -17,6 +17,16 @@ const MODE_OPTIONS = [
   { value: "current", label: "本期调仓" },
   { value: "history", label: "往期调仓" },
 ] as const;
+
+function emptyHoldingInputs(): Record<AssetKey, string> {
+  return ASSETS.reduce(
+    (values, asset) => {
+      values[asset.key] = "";
+      return values;
+    },
+    {} as Record<AssetKey, string>,
+  );
+}
 
 function eventLabel(event: RebalanceEventSummary): string {
   return `${formatDate(event.executionDate)} · ${event.type} · ${event.asset}`;
@@ -37,19 +47,36 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
   );
   const [mode, setMode] = useState<Mode>("current");
   const [selectedEventId, setSelectedEventId] = useState(availableEvents[0]?.id ?? "");
-  const [capitalInput, setCapitalInput] = useState("100,000");
-  const [capital, setCapital] = useState(100_000);
-  const [inputError, setInputError] = useState("");
+  const [holdingInputs, setHoldingInputs] = useState<Record<AssetKey, string>>(emptyHoldingInputs);
 
   const selectedEvent = availableEvents.find((event) => event.id === selectedEventId);
   const latest = dataset.nav.at(-1)!;
   const snapshot = mode === "history" && selectedEvent
     ? snapshotForEvent(dataset.nav, selectedEvent) ?? latest
     : latest;
-  const allocations = useMemo(
-    () => allocateCapital(capital, snapshot.weights),
-    [capital, snapshot],
+  const holdingAmounts = useMemo(
+    () => ASSETS.reduce(
+      (amounts, asset) => {
+        amounts[asset.key] = normalizeCapital(holdingInputs[asset.key]);
+        return amounts;
+      },
+      {} as Record<AssetKey, number>,
+    ),
+    [holdingInputs],
   );
+  const totalCapital = useMemo(
+    () => ASSETS.reduce((total, asset) => total + holdingAmounts[asset.key], 0),
+    [holdingAmounts],
+  );
+  const allocations = useMemo(
+    () => allocateCapital(totalCapital, snapshot.weights),
+    [totalCapital, snapshot],
+  );
+  const tradeThreshold = totalCapital * 0.003;
+  const totalTrade = allocations.reduce((total, row) => {
+    const difference = row.amount - holdingAmounts[row.key];
+    return total + (Math.abs(difference) > tradeThreshold ? Math.abs(difference) : 0);
+  }, 0);
   const eventsThroughSnapshot = useMemo(
     () => riskEventsForDate(dataset.events, snapshot.date),
     [dataset.events, snapshot.date],
@@ -96,16 +123,8 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
     [allocations],
   );
 
-  function submitCapital(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const value = normalizeCapital(capitalInput);
-    if (value <= 0) {
-      setInputError("请输入大于零的本金");
-      return;
-    }
-    setCapital(value);
-    setCapitalInput(value.toLocaleString("zh-CN", { maximumFractionDigits: 2 }));
-    setInputError("");
+  function updateHolding(key: AssetKey, value: string) {
+    setHoldingInputs((current) => ({ ...current, [key]: value }));
   }
 
   return (
@@ -139,28 +158,16 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
 
       <div className="grid grid-cols-[minmax(0,1fr)_340px] gap-5 max-[940px]:grid-cols-1">
         <section className="panel calculator-card overflow-hidden">
-          <form onSubmit={submitCapital} className="border-b border-[var(--line)] p-6 max-[680px]:p-5">
-            <label htmlFor="capital" className="text-sm font-semibold">投入本金</label>
-            <div className="mt-3 flex gap-3 max-[520px]:flex-col">
-              <div className="relative min-w-0 flex-1">
-                <span className="absolute top-1/2 left-4 -translate-y-1/2 text-sm text-[var(--muted)]">¥</span>
-                <input
-                  id="capital"
-                  value={capitalInput}
-                  onChange={(event) => setCapitalInput(event.target.value)}
-                  inputMode="decimal"
-                  autoComplete="off"
-                  className="soft-input h-12 w-full pr-4 pl-9 font-mono text-lg tabular-nums"
-                  aria-invalid={Boolean(inputError)}
-                />
-              </div>
-              <button type="submit" className="primary-button flex h-12 items-center justify-center gap-2 px-6 text-sm font-medium text-[#f9fcfb]">
-                <Calculator size={17} />
-                计算配置
-              </button>
+          <div className="rebalance-input-summary border-b border-[var(--line)]">
+            <div>
+              <div className="text-sm font-semibold">当前持仓</div>
+              <div className="mt-1 text-xs text-[var(--muted)]">逐项填写当前持有金额，调仓建议会实时更新</div>
             </div>
-            <div className="mt-2 min-h-5 text-xs text-[var(--positive)]">{inputError}</div>
-          </form>
+            <div className="rebalance-total">
+              <span>总资金</span>
+              <strong>{formatCurrency(totalCapital)}</strong>
+            </div>
+          </div>
 
           <div className="grid grid-cols-[280px_1fr] border-b border-[var(--line)] max-[680px]:grid-cols-1">
             <div className="bg-[var(--sky-card)] p-6 max-[680px]:border-r-0 max-[680px]:border-b">
@@ -190,48 +197,80 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
             </div>
             <div className="grid grid-cols-2">
               <SummaryItem label="配置日期" value={formatDate(snapshot.date)} />
-              <SummaryItem label="投入本金" value={formatCurrency(capital)} />
-              <SummaryItem label="持有资产" value={`${allocations.filter((row) => row.weight > 0 && row.key !== "cash").length} 项`} />
-              <SummaryItem label="现金比例" value={formatPercent(snapshot.weights.cash)} />
+              <SummaryItem label="总资金" value={formatCurrency(totalCapital)} />
+              <SummaryItem label="持有资产" value={`${allocations.filter((row) => holdingAmounts[row.key] > 0 && row.key !== "cash").length} 项`} />
+              <SummaryItem label="当前现金比例" value={formatPercent(totalCapital > 0 ? holdingAmounts.cash / totalCapital : 0)} />
             </div>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[620px] border-collapse text-left">
+            <table className="w-full min-w-[860px] border-collapse text-left">
               <thead>
                 <tr className="border-b border-[var(--line)] text-xs text-[var(--muted)]">
                   <th className="px-6 py-3 font-medium">资产</th>
-                  <th className="px-4 py-3 font-medium">代码</th>
+                  <th className="px-4 py-3 text-right font-medium">持有金额</th>
                   <th className="px-4 py-3 text-right font-medium">实际占比</th>
+                  <th className="px-4 py-3 text-right font-medium">策略占比</th>
                   <th className="px-6 py-3 text-right font-medium">配置金额</th>
+                  <th className="px-6 py-3 text-right font-medium">调仓建议</th>
                 </tr>
               </thead>
               <tbody>
                 {allocations.map((row) => {
                   const asset = ASSET_BY_KEY[row.key];
+                  const holdingAmount = holdingAmounts[row.key];
+                  const actualWeight = totalCapital > 0 ? holdingAmount / totalCapital : 0;
+                  const difference = row.amount - holdingAmount;
+                  const action = totalCapital <= 0
+                    ? "待输入"
+                    : Math.abs(difference) <= tradeThreshold
+                      ? "持有"
+                      : difference > 0
+                        ? `买入 ${formatCurrency(difference)}`
+                        : `卖出 ${formatCurrency(Math.abs(difference))}`;
                   return (
                     <tr key={row.key} className="table-row border-b border-[var(--line)] last:border-0">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: asset.color }} />
                           <div>
-                            <div className="text-sm font-semibold">{asset.label}</div>
-                            <div className="mt-1 text-xs text-[var(--muted)]">{asset.name}</div>
+                            <div className="font-mono text-xs text-[var(--muted)]">{asset.code}</div>
+                            <div className="mt-1 text-sm font-semibold">{asset.key === "cash" ? asset.label : asset.name}</div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-4 font-mono text-xs text-[var(--muted)]">{asset.code}</td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="relative ml-auto w-[150px]">
+                          <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-xs text-[var(--muted)]">¥</span>
+                          <input
+                            value={holdingInputs[row.key]}
+                            onChange={(event) => updateHolding(row.key, event.target.value)}
+                            inputMode="decimal"
+                            autoComplete="off"
+                            placeholder="0"
+                            className="holding-amount-input w-full pl-7"
+                            aria-label={`${asset.name}当前持有金额`}
+                          />
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 text-right font-mono text-sm font-medium tabular-nums">{formatPercent(actualWeight)}</td>
                       <td className="px-4 py-4 text-right font-mono text-sm font-medium tabular-nums">{formatPercent(row.weight)}</td>
                       <td className="px-6 py-4 text-right font-mono text-sm font-semibold tabular-nums">{formatCurrency(row.amount)}</td>
+                      <td className={`px-6 py-4 text-right font-mono text-sm font-semibold tabular-nums ${difference > tradeThreshold ? "positive" : difference < -tradeThreshold ? "negative" : "neutral"}`}>
+                        {action}
+                      </td>
                     </tr>
                   );
                 })}
               </tbody>
               <tfoot>
                 <tr className="bg-[rgb(231_238_244_/_28%)]">
-                  <td colSpan={2} className="px-6 py-4 text-sm font-semibold">合计</td>
+                  <td className="px-6 py-4 text-sm font-semibold">合计</td>
+                  <td className="px-4 py-4 text-right font-mono text-sm font-semibold">{formatCurrency(totalCapital)}</td>
                   <td className="px-4 py-4 text-right font-mono text-sm font-semibold">100.00%</td>
-                  <td className="px-6 py-4 text-right font-mono text-sm font-semibold">{formatCurrency(capital)}</td>
+                  <td className="px-4 py-4 text-right font-mono text-sm font-semibold">100.00%</td>
+                  <td className="px-6 py-4 text-right font-mono text-sm font-semibold">{formatCurrency(totalCapital)}</td>
+                  <td className="px-6 py-4 text-right font-mono text-sm font-semibold">{formatCurrency(totalTrade)}</td>
                 </tr>
               </tfoot>
             </table>
