@@ -1,14 +1,20 @@
 "use client";
 
 import * as echarts from "echarts";
-import { Check, ChevronLeft, ChevronRight, Save, Trash2 } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, CircleHelp, Save, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { EChart } from "@/components/echart";
 import { SegmentedControl } from "@/components/segmented-control";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { allocateCapital, normalizeCapital } from "@/lib/allocation";
 import { ASSETS, ASSET_BY_KEY, type AssetKey } from "@/lib/assets";
+import {
+  compareEventTriggersAscending,
+  compareEventTriggersDescending,
+  triggeredEventsThrough,
+} from "@/lib/event-display";
 import { formatCurrency, formatDate, formatPercent } from "@/lib/format";
 import type { PortfolioDataset, RebalanceEventSummary } from "@/lib/types";
 
@@ -80,10 +86,6 @@ function parseHoldingInputs(value: string): Record<AssetKey, string> | null {
   }
 }
 
-function riskEventsForDate(events: RebalanceEventSummary[], date: string): RebalanceEventSummary[] {
-  return events.filter((event) => event.executionDate <= date);
-}
-
 export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) {
   const [mode, setMode] = useState<Mode>("current");
   const [holdingInputs, setHoldingInputs] = useState<Record<AssetKey, string>>(emptyHoldingInputs);
@@ -146,19 +148,16 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
   );
   const tradeThreshold = totalCapital * 0.003;
   const eventsThroughSnapshot = useMemo(
-    () => riskEventsForDate(dataset.events, snapshot.date),
+    () => triggeredEventsThrough(dataset.events, snapshot.date),
     [dataset.events, snapshot.date],
   );
-  const formalEvent = [...eventsThroughSnapshot].reverse().find((event) => event.type === "正式调仓");
+  const formalEvent = [...eventsThroughSnapshot]
+    .sort(compareEventTriggersDescending)
+    .find((event) => event.type === "正式调仓");
   const cycleEvents = formalEvent
     ? eventsThroughSnapshot.filter((event) => event.cycleDate === formalEvent.cycleDate)
     : [];
-  const orderedCycleEvents = [...cycleEvents].sort((left, right) => {
-    const dateOrder = left.executionDate.localeCompare(right.executionDate);
-    if (dateOrder !== 0) return dateOrder;
-    const typeOrder = { 正式调仓: 0, 组合止损: 1, 单品种止盈: 2 } as const;
-    return typeOrder[left.type] - typeOrder[right.type] || left.sequence - right.sequence;
-  });
+  const orderedCycleEvents = [...cycleEvents].sort(compareEventTriggersAscending);
 
   const allocationPieOption = useMemo<echarts.EChartsCoreOption>(
     () => ({
@@ -395,6 +394,25 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
             <div className="risk-card-body">
               <div className="risk-card-header">
                 <h2>本期事件</h2>
+                <TooltipProvider delayDuration={180}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button type="button" className="event-rules-trigger" aria-label="查看调仓规则">
+                        <CircleHelp size={17} strokeWidth={1.9} />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="bottom"
+                      align="end"
+                      sideOffset={8}
+                      className="event-rules-tooltip max-w-[min(320px,calc(100vw-24px))] flex-col items-start gap-2 rounded-2xl bg-[#fffdf8] p-4 text-[#202124] shadow-[0_18px_46px_rgb(54_59_54_/_15%)] ring-1 ring-[#dedfd9] [&>svg]:bg-[#fffdf8] [&>svg]:fill-[#fffdf8]"
+                    >
+                      <strong className="text-sm">调仓规则</strong>
+                      <p>策略在交易日收盘后确认信号，本页日期为信号触发日；用户在下一交易日按最新策略比例调仓。</p>
+                      <p><strong>例：</strong>8月24日收盘触发组合止损，本期事件显示8月24日，用户在8月25日交易时完成调仓。</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
               <div className="event-timeline-scroll">
                 <div className="event-timeline">
@@ -407,7 +425,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
                       <div className="event-timeline-content">
                         <div className="event-timeline-heading">
                           <span>{event.type}</span>
-                          <time dateTime={event.executionDate}>{formatDate(event.executionDate)}</time>
+                          <time dateTime={event.signalDate}>{formatDate(event.signalDate)}</time>
                         </div>
                         <p className="event-timeline-description">{event.asset} · {event.reason}</p>
                         <div className="event-adjustment-list">
@@ -510,10 +528,7 @@ function HistoryRebalanceTable({
 }) {
   const [page, setPage] = useState(1);
   const orderedEvents = useMemo(
-    () => [...events].sort((left, right) => {
-      const dateOrder = right.executionDate.localeCompare(left.executionDate);
-      return dateOrder || right.sequence - left.sequence;
-    }),
+    () => [...events].sort(compareEventTriggersDescending),
     [events],
   );
   const totalPages = Math.max(1, Math.ceil(orderedEvents.length / HISTORY_PAGE_SIZE));
@@ -530,7 +545,7 @@ function HistoryRebalanceTable({
         <table className="w-full min-w-[760px] border-collapse text-left">
           <thead>
             <tr className="border-b border-[var(--line)] text-xs text-[var(--muted)]">
-              <th className="px-6 py-4 font-medium">执行日期</th>
+              <th className="px-6 py-4 font-medium">触发日期</th>
               <th className="px-5 py-4 font-medium">事件</th>
               <th className="px-5 py-4 font-medium">资产</th>
               <th className="px-6 py-4 font-medium">说明</th>
@@ -539,7 +554,7 @@ function HistoryRebalanceTable({
           <tbody>
             {visibleEvents.map((event) => (
               <tr key={event.id} className="table-row border-b border-[var(--line)] last:border-0">
-                <td className="px-6 py-5 font-mono text-sm tabular-nums">{formatDate(event.executionDate)}</td>
+                <td className="px-6 py-5 font-mono text-sm tabular-nums">{formatDate(event.signalDate)}</td>
                 <td className="px-5 py-5 text-sm font-semibold">{event.type}</td>
                 <td className="px-5 py-5 text-sm">{event.asset || "组合"}</td>
                 <td className="px-6 py-5 text-sm text-[var(--muted)]">{event.reason}</td>
@@ -558,7 +573,7 @@ function HistoryRebalanceTable({
           <article key={event.id} className="history-mobile-event">
             <div className="history-mobile-event-heading">
               <strong>{event.type}</strong>
-              <time dateTime={event.executionDate}>{formatDate(event.executionDate)}</time>
+              <time dateTime={event.signalDate}>{formatDate(event.signalDate)}</time>
             </div>
             <div className="history-mobile-event-asset">{event.asset || "组合"}</div>
             <p>{event.reason}</p>

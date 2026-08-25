@@ -804,6 +804,10 @@ header nav a:not([aria-current="page"]) {
 }
 
 .risk-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   padding: 16px 18px 10px;
 }
 
@@ -812,6 +816,37 @@ header nav a:not([aria-current="page"]) {
   font-size: 20px;
   font-weight: 700;
   line-height: 1.3;
+}
+
+.event-rules-trigger {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(47 98 136 / 10%);
+  color: var(--blue-deep);
+  cursor: help;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.event-rules-trigger:hover,
+.event-rules-trigger[aria-expanded="true"] {
+  background: rgb(47 98 136 / 17%);
+  color: #103e5c;
+}
+
+.event-rules-tooltip p {
+  margin: 0;
+  color: #626761;
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.event-rules-tooltip p strong {
+  color: var(--foreground);
 }
 
 .event-timeline-scroll {
