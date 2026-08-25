@@ -203,7 +203,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
           emphasis: {
             scale: true,
             scaleSize: 4,
-            itemStyle: { shadowBlur: 12, shadowColor: "rgba(54, 63, 69, 0.18)" },
+            itemStyle: { shadowBlur: 0, shadowColor: "transparent" },
           },
           data: strategyRows
             .filter((row) => row.weight > 0)
