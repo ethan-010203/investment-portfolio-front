@@ -102,60 +102,19 @@ select:focus-visible {
   box-shadow: var(--shadow);
 }
 
-.net-value-sidebar-heading {
+.net-value-metrics {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-}
-
-.net-value-sidebar-heading h1 {
-  margin: 0;
-  font-size: 25px;
-  font-weight: 680;
-  line-height: 1.1;
-}
-
-.net-value-sidebar-heading p {
-  margin: 0;
-  color: var(--muted);
-  font-size: 11px;
-}
-
-.net-value-sidebar-label {
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.net-value-identity {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  border-radius: 17px;
-  background: var(--blue-card);
-  padding: 12px 13px;
-}
-
-.net-value-identity strong {
-  font-size: 14px;
-}
-
-.net-value-identity span {
-  color: var(--muted);
-  font-size: 10px;
-}
-
-.net-value-metrics {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 0;
 }
 
 .net-value-sidebar .metric-card {
-  min-height: 86px;
-  border-radius: 19px;
-  padding: 14px !important;
+  min-height: 0;
+  border-bottom: 1px solid #e5ebe7;
+  border-radius: 0;
+  background: transparent !important;
+  padding: 13px 0 !important;
+  box-shadow: none;
 }
 
 .net-value-sidebar .metric-card .mt-2 {
@@ -163,11 +122,21 @@ select:focus-visible {
   font-size: 1.15rem;
 }
 
+.net-value-sidebar .metric-card:first-child {
+  padding-top: 0 !important;
+}
+
+.net-value-sidebar .metric-card:last-child {
+  border-bottom: 0;
+}
+
 .net-value-sidebar-controls {
   display: flex;
   min-height: 0;
   flex-direction: column;
   gap: 13px;
+  border-top: 1px solid #e5ebe7;
+  padding-top: 17px;
 }
 
 .net-value-control {

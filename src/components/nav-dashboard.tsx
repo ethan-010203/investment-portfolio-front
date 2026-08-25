@@ -7,7 +7,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { EChart } from "@/components/echart";
 import { ASSETS, type AssetKey } from "@/lib/assets";
 import { buildSelectedCurve } from "@/lib/factor-curve";
-import { formatDate, formatNumber, formatPercent, returnTone } from "@/lib/format";
+import { formatNumber, formatPercent, returnTone } from "@/lib/format";
 import { calculateMetrics } from "@/lib/metrics";
 import type { NavSeriesRecord } from "@/lib/types";
 
@@ -233,20 +233,6 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
   return (
     <div className="net-value-layout">
       <aside className="net-value-sidebar">
-        <div className="net-value-sidebar-heading">
-          <span className="eyebrow">策略净值</span>
-          <h1>每日净值</h1>
-          <p>数据截至 {formatDate(rows.at(-1)!.dataThrough)}</p>
-        </div>
-
-        <div className="net-value-control">
-          <span className="net-value-sidebar-label">净值口径</span>
-          <div className="net-value-identity">
-            <strong>组合净值</strong>
-            <span>正式策略</span>
-          </div>
-        </div>
-
         <div className="net-value-metrics">
           <Metric label="累计净值" value={formatNumber(metrics.cumulativeNav, 4)} />
           <Metric label="区间末日收益" value={formatPercent(metrics.latestReturn)} tone={returnTone(metrics.latestReturn)} />
