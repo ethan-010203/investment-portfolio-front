@@ -27,6 +27,7 @@ const PRESET_OPTIONS: ReadonlyArray<{ label: string; value: DateRangePreset }> =
 ];
 
 const MONTHS = Array.from({ length: 12 }, (_, index) => index);
+const EMPTY_DATE_RANGE: DateRange = { from: undefined, to: undefined };
 
 export function NetValueDateRangePicker() {
   const { availableDates, effectiveRange, setRange } = useNetValueDateRange();
@@ -233,7 +234,7 @@ export function NetValueDateRangePicker() {
               {view === "day" && (
                 <Calendar
                   mode="range"
-                  selected={pendingDate ? undefined : selectedRange}
+                  selected={pendingDate ? EMPTY_DATE_RANGE : selectedRange}
                   modifiers={pendingDate ? { pendingStart: pendingDate } : undefined}
                   modifiersClassNames={{
                     pendingStart: "[&_button]:bg-[#1d516f] [&_button]:text-white [&_button]:hover:bg-[#1d516f]",
