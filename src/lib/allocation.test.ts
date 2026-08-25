@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { allocateCapital, normalizeCapital } from "@/lib/allocation";
+import { allocateCapital, formatRebalanceAction, normalizeCapital } from "@/lib/allocation";
 import type { WeightMap } from "@/lib/types";
 
 const weights: WeightMap = {
@@ -27,5 +27,15 @@ describe("本金分配", () => {
     expect(() => allocateCapital(100_000, { ...weights, cash: 0.1 })).toThrow(
       "权重合计必须为100%",
     );
+  });
+
+  it("现金增加使用转入，现金减少使用转出", () => {
+    expect(formatRebalanceAction("cash", 16_496.46, 100)).toBe("转入 ¥16,496.46");
+    expect(formatRebalanceAction("cash", -16_496.46, 100)).toBe("转出 ¥16,496.46");
+  });
+
+  it("非现金资产继续使用买入和卖出", () => {
+    expect(formatRebalanceAction("gold", 1_000, 100)).toBe("买入 ¥1,000");
+    expect(formatRebalanceAction("gold", -1_000, 100)).toBe("卖出 ¥1,000");
   });
 });

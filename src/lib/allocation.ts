@@ -1,4 +1,5 @@
 import { ASSETS, type AssetKey } from "@/lib/assets";
+import { formatCurrency } from "@/lib/format";
 import type { AllocationRow, WeightMap } from "@/lib/types";
 
 export function normalizeCapital(value: string): number {
@@ -27,4 +28,16 @@ export function allocateCapital(capital: number, weights: WeightMap): Allocation
     weight: weights[asset.key],
     amount: amounts.get(asset.key) ?? 0,
   }));
+}
+
+export function formatRebalanceAction(
+  assetKey: AssetKey,
+  difference: number,
+  threshold: number,
+): string {
+  if (Math.abs(difference) <= threshold) return "持有";
+
+  const amount = formatCurrency(Math.abs(difference));
+  if (assetKey === "cash") return `${difference > 0 ? "转入" : "转出"} ${amount}`;
+  return `${difference > 0 ? "买入" : "卖出"} ${amount}`;
 }

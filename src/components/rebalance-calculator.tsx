@@ -8,7 +8,7 @@ import { EChart } from "@/components/echart";
 import { SegmentedControl } from "@/components/segmented-control";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { allocateCapital, normalizeCapital } from "@/lib/allocation";
+import { allocateCapital, formatRebalanceAction, normalizeCapital } from "@/lib/allocation";
 import { ASSETS, ASSET_BY_KEY, type AssetKey } from "@/lib/assets";
 import {
   compareEventTriggersDescending,
@@ -280,11 +280,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
                     const asset = ASSET_BY_KEY[row.key];
                     const holdingAmount = holdingAmounts[row.key];
                     const difference = targetAmounts[row.key] - holdingAmount;
-                    const action = Math.abs(difference) <= tradeThreshold
-                      ? "持有"
-                      : difference > 0
-                        ? `买入 ${formatCurrency(difference)}`
-                        : `卖出 ${formatCurrency(Math.abs(difference))}`;
+                    const action = formatRebalanceAction(row.key, difference, tradeThreshold);
                     return (
                       <tr key={row.key} className="table-row border-b border-[var(--line)] last:border-0">
                         <td className="px-6 py-4 text-left">
@@ -326,11 +322,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
                 const asset = ASSET_BY_KEY[row.key];
                 const holdingAmount = holdingAmounts[row.key];
                 const difference = targetAmounts[row.key] - holdingAmount;
-                const action = Math.abs(difference) <= tradeThreshold
-                  ? "持有"
-                  : difference > 0
-                    ? `买入 ${formatCurrency(difference)}`
-                    : `卖出 ${formatCurrency(Math.abs(difference))}`;
+                const action = formatRebalanceAction(row.key, difference, tradeThreshold);
                 const tone = difference > tradeThreshold
                   ? "positive"
                   : difference < -tradeThreshold
