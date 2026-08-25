@@ -541,27 +541,33 @@ function HistoryRebalanceTable({
     <section className="panel history-table-card overflow-hidden">
       <RebalanceModeBar mode={mode} onModeChange={onModeChange} />
       <div className="history-table-scroll overflow-x-auto">
-        <table className="w-full min-w-[760px] border-collapse text-left">
+        <table className="history-events-table">
+          <colgroup>
+            <col className="history-date-column" />
+            <col className="history-type-column" />
+            <col className="history-asset-column" />
+            <col className="history-reason-column" />
+          </colgroup>
           <thead>
-            <tr className="border-b border-[var(--line)] text-xs text-[var(--muted)]">
-              <th className="px-6 py-4 font-medium">触发日期</th>
-              <th className="px-5 py-4 font-medium">事件</th>
-              <th className="px-5 py-4 font-medium">资产</th>
-              <th className="px-6 py-4 font-medium">说明</th>
+            <tr>
+              <th scope="col">触发日期</th>
+              <th scope="col">事件</th>
+              <th scope="col">资产</th>
+              <th scope="col" className="history-reason-cell">说明</th>
             </tr>
           </thead>
           <tbody>
             {visibleEvents.map((event) => (
-              <tr key={event.id} className="table-row border-b border-[var(--line)] last:border-0">
-                <td className="px-6 py-5 font-mono text-sm tabular-nums">{formatDate(event.signalDate)}</td>
-                <td className="px-5 py-5 text-sm font-semibold">{event.type}</td>
-                <td className="px-5 py-5 text-sm">{event.asset || "组合"}</td>
-                <td className="px-6 py-5 text-sm text-[var(--muted)]">{event.reason}</td>
+              <tr key={event.id}>
+                <td className="history-event-date">{formatDate(event.signalDate)}</td>
+                <td className="history-event-type">{event.type}</td>
+                <td>{event.asset || "组合"}</td>
+                <td className="history-reason-cell history-event-reason">{event.reason}</td>
               </tr>
             ))}
             {visibleEvents.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-6 py-16 text-center text-sm text-[var(--muted)]">暂无历史调仓事件</td>
+                <td colSpan={4} className="history-events-empty">暂无历史调仓事件</td>
               </tr>
             )}
           </tbody>

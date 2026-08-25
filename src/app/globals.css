@@ -742,9 +742,93 @@ header nav a:not([aria-current="page"]) {
 }
 
 .history-table-scroll {
+  display: flex;
   min-height: 0;
   flex: 1 1 auto;
   overflow-y: auto;
+}
+
+.history-events-table {
+  width: 100%;
+  min-width: 760px;
+  height: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.history-events-table .history-date-column,
+.history-events-table .history-type-column {
+  width: 18%;
+}
+
+.history-events-table .history-asset-column {
+  width: 14%;
+}
+
+.history-events-table .history-reason-column {
+  width: 50%;
+}
+
+.history-events-table thead {
+  height: 54px;
+  color: var(--foreground);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.history-events-table th,
+.history-events-table td {
+  border-right: 1px solid rgb(84 89 84 / 12%);
+  border-bottom: 1px solid rgb(84 89 84 / 12%);
+  padding: 10px 20px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.history-events-table th {
+  background: rgb(238 240 237 / 62%);
+  font-weight: 700;
+}
+
+.history-events-table th:last-child,
+.history-events-table td:last-child {
+  border-right: 0;
+}
+
+.history-events-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.history-events-table tbody tr:hover {
+  background: #eef5f5;
+}
+
+.history-events-table tbody td {
+  color: var(--foreground);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.history-events-table .history-event-date {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.history-events-table .history-event-type {
+  font-weight: 700;
+}
+
+.history-events-table .history-reason-cell {
+  text-align: left;
+}
+
+.history-events-table .history-event-reason {
+  color: var(--muted);
+}
+
+.history-events-table .history-events-empty {
+  color: var(--muted);
+  text-align: center;
 }
 
 .history-table-footer {
@@ -755,7 +839,7 @@ header nav a:not([aria-current="page"]) {
   border-top: 1px solid var(--line);
   padding: 12px 18px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .history-pagination {
