@@ -115,18 +115,9 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
 
   return (
     <div className="rebalance-page">
-      <div className="rebalance-mode-bar">
-        <SegmentedControl value={mode} options={MODE_OPTIONS} onChange={setMode} label="调仓周期" />
-        {mode === "current" && (
-          <div className="rebalance-total">
-            <span>总资金</span>
-            <strong>{formatCurrency(totalCapital)}</strong>
-          </div>
-        )}
-      </div>
-
-      {mode === "history" ? <HistoryRebalanceTable events={dataset.events} /> : <div className="rebalance-workspace">
+      {mode === "history" ? <HistoryRebalanceTable events={dataset.events} mode={mode} onModeChange={setMode} /> : <div className="rebalance-workspace">
         <section className="panel calculator-card rebalance-calculator-panel overflow-hidden">
+          <RebalanceModeBar mode={mode} onModeChange={setMode} totalCapital={totalCapital} />
           <div className="rebalance-table-scroll overflow-x-auto">
             <table className="w-full min-w-[860px] border-collapse text-left">
               <thead>
@@ -222,7 +213,37 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
   );
 }
 
-function HistoryRebalanceTable({ events }: { events: RebalanceEventSummary[] }) {
+function RebalanceModeBar({
+  mode,
+  onModeChange,
+  totalCapital,
+}: {
+  mode: Mode;
+  onModeChange: (value: Mode) => void;
+  totalCapital?: number;
+}) {
+  return (
+    <div className="rebalance-mode-bar">
+      <SegmentedControl value={mode} options={MODE_OPTIONS} onChange={onModeChange} label="调仓周期" />
+      {totalCapital !== undefined && (
+        <div className="rebalance-total">
+          <span>总资金</span>
+          <strong>{formatCurrency(totalCapital)}</strong>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function HistoryRebalanceTable({
+  events,
+  mode,
+  onModeChange,
+}: {
+  events: RebalanceEventSummary[];
+  mode: Mode;
+  onModeChange: (value: Mode) => void;
+}) {
   const [page, setPage] = useState(1);
   const orderedEvents = useMemo(
     () => [...events].sort((left, right) => {
@@ -240,6 +261,7 @@ function HistoryRebalanceTable({ events }: { events: RebalanceEventSummary[] }) 
 
   return (
     <section className="panel history-table-card overflow-hidden">
+      <RebalanceModeBar mode={mode} onModeChange={onModeChange} />
       <div className="history-table-scroll overflow-x-auto">
         <table className="w-full min-w-[760px] border-collapse text-left">
           <thead>
