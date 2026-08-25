@@ -129,8 +129,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
 
   return (
     <>
-      <div className="page-title-row">
-        <h1 className="page-title">调仓计算</h1>
+      <div className="rebalance-toolbar">
         <SegmentedControl value={mode} options={MODE_OPTIONS} onChange={setMode} label="调仓周期" />
       </div>
 
@@ -166,40 +165,6 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
             <div className="rebalance-total">
               <span>总资金</span>
               <strong>{formatCurrency(totalCapital)}</strong>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-[280px_1fr] border-b border-[var(--line)] max-[680px]:grid-cols-1">
-            <div className="bg-[var(--sky-card)] p-6 max-[680px]:border-r-0 max-[680px]:border-b">
-              <div className="relative mx-auto size-[224px]">
-                <EChart option={donutOption} className="size-full" label="资产配置占比图" />
-                <div className="pointer-events-none absolute inset-0 grid place-items-center text-center">
-                  <div>
-                    <div className="text-xs text-[var(--muted)]">最新净值</div>
-                    <div className="mt-1 font-mono text-lg font-semibold">{formatNumber(snapshot.cumulativeNav, 4)}</div>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2">
-                {allocations.map((row) => {
-                  const asset = ASSET_BY_KEY[row.key];
-                  return (
-                    <div key={row.key} className="flex min-w-0 items-center justify-between gap-2 text-xs">
-                      <span className="flex min-w-0 items-center gap-1.5">
-                        <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: asset.color }} />
-                        <span className="truncate text-[var(--muted)]">{asset.label}</span>
-                      </span>
-                      <span className="font-mono tabular-nums">{formatPercent(row.weight, 1)}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-            <div className="grid grid-cols-2">
-              <SummaryItem label="配置日期" value={formatDate(snapshot.date)} />
-              <SummaryItem label="总资金" value={formatCurrency(totalCapital)} />
-              <SummaryItem label="持有资产" value={`${allocations.filter((row) => holdingAmounts[row.key] > 0 && row.key !== "cash").length} 项`} />
-              <SummaryItem label="当前现金比例" value={formatPercent(totalCapital > 0 ? holdingAmounts.cash / totalCapital : 0)} />
             </div>
           </div>
 
@@ -264,7 +229,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
                 })}
               </tbody>
               <tfoot>
-                <tr className="bg-[rgb(231_238_244_/_28%)]">
+                <tr>
                   <td className="px-6 py-4 text-sm font-semibold">合计</td>
                   <td className="px-4 py-4 text-right font-mono text-sm font-semibold">{formatCurrency(totalCapital)}</td>
                   <td className="px-4 py-4 text-right font-mono text-sm font-semibold">100.00%</td>
@@ -277,7 +242,40 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
           </div>
         </section>
 
-        <aside className="panel risk-card h-fit overflow-hidden">
+        <div className="rebalance-side-column">
+          <section className="panel rebalance-pie-card overflow-hidden">
+            <div className="rebalance-pie-header">
+              <h2>资产配置</h2>
+              <span>{formatDate(snapshot.date)}</span>
+            </div>
+            <div className="rebalance-pie-content">
+              <div className="rebalance-pie-chart">
+                <EChart option={donutOption} className="size-full" label="资产配置占比图" />
+                <div className="pointer-events-none absolute inset-0 grid place-items-center text-center">
+                  <div>
+                    <div className="text-xs text-[var(--muted)]">最新净值</div>
+                    <div className="mt-1 font-mono text-lg font-semibold">{formatNumber(snapshot.cumulativeNav, 4)}</div>
+                  </div>
+                </div>
+              </div>
+              <div className="rebalance-pie-legend">
+                {allocations.map((row) => {
+                  const asset = ASSET_BY_KEY[row.key];
+                  return (
+                    <div key={row.key} className="flex min-w-0 items-center justify-between gap-2 text-xs">
+                      <span className="flex min-w-0 items-center gap-1.5">
+                        <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: asset.color }} />
+                        <span className="truncate text-[var(--muted)]">{asset.label}</span>
+                      </span>
+                      <span className="font-mono tabular-nums">{formatPercent(row.weight, 1)}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+
+          <aside className="panel risk-card h-fit overflow-hidden">
           <div className="flex items-center gap-3 border-b border-[var(--line)] px-5 py-5">
             <span className="grid size-10 place-items-center rounded-full bg-[var(--blue-soft)] text-[var(--blue)]">
               <ShieldCheck size={18} />
@@ -322,18 +320,10 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
               {eventsThroughSnapshot.length === 0 && <div className="text-sm text-[var(--muted)]">暂无调仓事件</div>}
             </div>
           </div>
-        </aside>
+          </aside>
+        </div>
       </div>
     </>
-  );
-}
-
-function SummaryItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="summary-item border-r border-b border-[var(--line)] p-5 even:border-r-0 nth-[n+3]:border-b-0 max-[420px]:p-4">
-      <div className="text-xs text-[var(--muted)]">{label}</div>
-      <div className="mt-2 truncate font-mono text-sm font-semibold tabular-nums" title={value}>{value}</div>
-    </div>
   );
 }
 
