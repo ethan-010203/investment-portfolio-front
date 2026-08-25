@@ -120,11 +120,17 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
           <HistoryRebalanceTable events={dataset.events} mode={mode} onModeChange={setMode} />
         ) : (
           <section className="panel calculator-card rebalance-calculator-panel overflow-hidden">
-          <RebalanceModeBar mode={mode} onModeChange={setMode} totalCapital={totalCapital} />
-          <div className="rebalance-table-scroll overflow-x-auto">
-            <table className="w-full min-w-[860px] border-collapse text-left">
+            <RebalanceModeBar mode={mode} onModeChange={setMode} totalCapital={totalCapital} />
+            <div className="rebalance-table-scroll overflow-x-auto">
+            <table className="rebalance-calculation-table w-full min-w-[720px] border-collapse text-left">
+              <colgroup>
+                <col className="rebalance-asset-column" />
+                <col className="rebalance-holding-column" />
+                <col className="rebalance-weight-column" />
+                <col className="rebalance-advice-column" />
+              </colgroup>
               <thead>
-                <tr className="border-b border-[var(--line)] text-xs text-[var(--muted)]">
+                <tr className="border-b border-[var(--line)] text-[var(--muted)]">
                   <th className="px-6 py-3 font-medium">资产</th>
                   <th className="px-4 py-3 text-right font-medium">持有金额</th>
                   <th className="px-4 py-3 text-right font-medium">当前策略占比</th>
@@ -136,28 +142,27 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
                   const asset = ASSET_BY_KEY[row.key];
                   const holdingAmount = holdingAmounts[row.key];
                   const difference = row.amount - holdingAmount;
-                  const action = totalCapital <= 0
-                    ? "待输入"
-                    : Math.abs(difference) <= tradeThreshold
-                      ? "持有"
-                      : difference > 0
-                        ? `买入 ${formatCurrency(difference)}`
-                        : `卖出 ${formatCurrency(Math.abs(difference))}`;
+                  const action = Math.abs(difference) <= tradeThreshold
+                    ? "持有"
+                    : difference > 0
+                      ? `买入 ${formatCurrency(difference)}`
+                      : `卖出 ${formatCurrency(Math.abs(difference))}`;
                   return (
                     <tr key={row.key} className="table-row border-b border-[var(--line)] last:border-0">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: asset.color }} />
                           <div>
-                            <div className="font-mono text-xs text-[var(--muted)]">{asset.code}</div>
-                            <div className="mt-1 text-sm font-semibold">{asset.key === "cash" ? asset.label : asset.name}</div>
+                            <div className="rebalance-asset-code font-mono text-[var(--muted)]">{asset.code}</div>
+                            <div className="rebalance-asset-name mt-1 font-semibold">{asset.key === "cash" ? asset.label : asset.name}</div>
                           </div>
                         </div>
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <div className="relative ml-auto w-[150px]">
+                        <div className="relative ml-auto w-full max-w-[172px]">
                           <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-xs text-[var(--muted)]">¥</span>
                           <input
+                            type="text"
                             value={holdingInputs[row.key]}
                             onChange={(event) => updateHolding(row.key, event.target.value)}
                             inputMode="decimal"
@@ -168,8 +173,8 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
                           />
                         </div>
                       </td>
-                      <td className="px-4 py-4 text-right font-mono text-sm font-medium tabular-nums">{formatPercent(row.weight)}</td>
-                      <td className={`px-6 py-4 text-right font-mono text-sm font-semibold tabular-nums ${difference > tradeThreshold ? "positive" : difference < -tradeThreshold ? "negative" : "neutral"}`}>
+                      <td className="rebalance-strategy-weight px-4 py-4 text-right font-mono font-medium tabular-nums">{formatPercent(row.weight)}</td>
+                      <td aria-live="polite" className={`rebalance-advice px-6 py-4 text-right font-mono font-semibold tabular-nums ${difference > tradeThreshold ? "positive" : difference < -tradeThreshold ? "negative" : "neutral"}`}>
                         {action}
                       </td>
                     </tr>
@@ -177,7 +182,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
                 })}
               </tbody>
             </table>
-          </div>
+            </div>
           </section>
         )}
 
