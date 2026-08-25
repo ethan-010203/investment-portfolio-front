@@ -127,8 +127,9 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
           color: "#85847e",
           margin: isMobile ? 10 : 15,
           fontSize: isMobile ? 10 : 12,
+          interval: isMobile ? 5 : 3,
           hideOverlap: true,
-          formatter: (value: string) => value.slice(0, 7).replace("-", "."),
+          formatter: (value: string) => value.replaceAll("-", "."),
         },
       },
       yAxis: {
@@ -218,8 +219,9 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
           color: "#85847e",
           margin: isMobile ? 10 : 15,
           fontSize: isMobile ? 10 : 12,
+          interval: isMobile ? 5 : 3,
           hideOverlap: true,
-          formatter: (value: string) => value.slice(0, 7).replace("-", "."),
+          formatter: (value: string) => value.replaceAll("-", "."),
         },
       },
       yAxis: {
