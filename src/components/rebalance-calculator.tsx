@@ -34,6 +34,27 @@ const PIE_COLORS: Record<AssetKey, string> = {
   cash: "#A7AAA3",
 };
 
+function createPiePattern(color: string) {
+  const texture = `<svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 42 42">
+    <rect width="42" height="42" fill="${color}"/>
+    <g fill="none" stroke="#fff" stroke-opacity=".22" stroke-width=".85" stroke-linecap="round">
+      <path d="M-10 8 8-10M-6 20 20-6M-4 34 34-4M6 44 44 6M20 48 48 20"/>
+      <path d="M-6 14C7 11 18 16 48 8M-4 30C11 25 27 33 48 24M2 43C14 38 30 43 47 37"/>
+    </g>
+    <g fill="none" stroke="#1f2937" stroke-opacity=".11" stroke-width=".7" stroke-linecap="round">
+      <path d="M-8 5 37 50M4-7 50 39M-5 24C10 19 29 24 48 17"/>
+    </g>
+  </svg>`;
+  return {
+    image: `data:image/svg+xml,${encodeURIComponent(texture)}`,
+    repeat: "repeat" as const,
+  };
+}
+
+const PIE_PATTERNS = Object.fromEntries(
+  ASSETS.map((asset) => [asset.key, createPiePattern(PIE_COLORS[asset.key])]),
+) as Record<AssetKey, ReturnType<typeof createPiePattern>>;
+
 function emptyHoldingInputs(): Record<AssetKey, string> {
   return ASSETS.reduce(
     (values, asset) => {
@@ -146,17 +167,34 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
       series: [
         {
           type: "pie",
-          radius: "88%",
+          radius: "58%",
           center: ["50%", "50%"],
           avoidLabelOverlap: true,
           selectedMode: "single",
           selectedOffset: 5,
-          itemStyle: { borderColor: "#fffaf2", borderWidth: 2 },
-          label: { show: false },
-          labelLine: { show: false },
+          itemStyle: { borderColor: "#fff8eb", borderWidth: 2 },
+          label: {
+            show: true,
+            position: "outside",
+            alignTo: "edge",
+            edgeDistance: 8,
+            bleedMargin: 0,
+            distanceToLabelLine: 4,
+            color: "#454844",
+            fontSize: 13,
+            fontWeight: 650,
+            formatter: "{b}",
+          },
+          labelLine: {
+            show: true,
+            length: 15,
+            length2: 10,
+            lineStyle: { width: 1.4, opacity: 0.9 },
+          },
+          labelLayout: { hideOverlap: false, moveOverlap: "shiftY" },
           emphasis: {
             scale: true,
-            scaleSize: 5,
+            scaleSize: 4,
             itemStyle: { shadowBlur: 12, shadowColor: "rgba(54, 63, 69, 0.18)" },
           },
           data: allocations
@@ -164,7 +202,8 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
             .map((row) => ({
               name: ASSET_BY_KEY[row.key].label,
               value: Number((row.weight * 100).toFixed(6)),
-              itemStyle: { color: PIE_COLORS[row.key] },
+              itemStyle: { color: PIE_PATTERNS[row.key] },
+              labelLine: { lineStyle: { color: PIE_COLORS[row.key] } },
             })),
         },
       ],
@@ -279,21 +318,11 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
         )}
 
         <div className="rebalance-side-column">
-          <section className="panel rebalance-pie-card overflow-hidden">
-            <div className="rebalance-pie-chart">
-              <EChart option={allocationPieOption} className="size-full" label="资产配置占比图" />
-            </div>
-            <div className="rebalance-pie-legend">
-              {allocations.map((row) => {
-                const asset = ASSET_BY_KEY[row.key];
-                return (
-                  <div key={row.key} className="rebalance-pie-legend-item">
-                    <span className="asset-dot" style={{ backgroundColor: PIE_COLORS[row.key] }} />
-                    <span className="rebalance-pie-legend-name">{asset.label}</span>
-                    <span className="rebalance-pie-legend-value">{formatPercent(row.weight, 1)}</span>
-                  </div>
-                );
-              })}
+          <section className="rebalance-pie-card overflow-hidden">
+            <div className="rebalance-pie-hero">
+              <div className="rebalance-pie-chart">
+                <EChart option={allocationPieOption} className="size-full" label="资产配置占比图" />
+              </div>
             </div>
           </section>
 
