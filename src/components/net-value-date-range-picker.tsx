@@ -8,7 +8,7 @@ import type { DateRange } from "react-day-picker";
 
 import { useNetValueDateRange } from "@/components/net-value-date-range-context";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar, CalendarDayButton } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   advanceDateRangeSelection,
@@ -237,8 +237,16 @@ export function NetValueDateRangePicker() {
                   selected={pendingDate ? EMPTY_DATE_RANGE : selectedRange}
                   onSelect={() => undefined}
                   modifiers={pendingDate ? { pendingStart: pendingDate } : undefined}
-                  modifiersClassNames={{
-                    pendingStart: "[&_button]:bg-[#1d516f] [&_button]:text-white [&_button]:hover:bg-[#1d516f]",
+                  components={{
+                    DayButton: (props) => (
+                      <CalendarDayButton
+                        {...props}
+                        locale={zhCN}
+                        className={props.modifiers.pendingStart
+                          ? "bg-[#1d516f] text-white hover:bg-[#1d516f] hover:text-white"
+                          : props.className}
+                      />
+                    ),
                   }}
                   month={visibleMonth}
                   onMonthChange={setVisibleMonth}
@@ -255,6 +263,7 @@ export function NetValueDateRangePicker() {
                     month_caption: "hidden",
                     nav: "hidden",
                     month_grid: "w-full border-collapse",
+                    today: "rounded-(--cell-radius) bg-[#edf2f1] text-[#24343d]",
                   }}
                 />
               )}
