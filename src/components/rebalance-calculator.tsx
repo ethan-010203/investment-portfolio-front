@@ -1,8 +1,8 @@
 "use client";
 
 import * as echarts from "echarts";
-import { Check, ChevronLeft, ChevronRight, CircleHelp, Save, Trash2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { ChevronLeft, ChevronRight, CircleHelp } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { EChart } from "@/components/echart";
 import { SegmentedControl } from "@/components/segmented-control";
@@ -88,8 +88,8 @@ function parseHoldingInputs(value: string): Record<AssetKey, string> | null {
 export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) {
   const [mode, setMode] = useState<Mode>("current");
   const [holdingInputs, setHoldingInputs] = useState<Record<AssetKey, string>>(emptyHoldingInputs);
-  const [saveStatus, setSaveStatus] = useState<"idle" | "saved" | "error">("idle");
   const [rulesOpen, setRulesOpen] = useState(false);
+  const holdingsCacheReady = useRef(false);
   const isMobile = useMediaQuery("(max-width: 720px)");
 
   useEffect(() => {
@@ -105,15 +105,25 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
           return;
         }
         setHoldingInputs(restored);
-        setSaveStatus("saved");
       } catch {
-        setSaveStatus("error");
+        // 浏览器禁用本地存储时仍允许当前页面正常计算。
+      } finally {
+        holdingsCacheReady.current = true;
       }
     });
     return () => {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (!holdingsCacheReady.current) return;
+    try {
+      window.localStorage.setItem(HOLDINGS_STORAGE_KEY, JSON.stringify(holdingInputs));
+    } catch {
+      // 浏览器禁用本地存储时仍保留当前页面内的输入。
+    }
+  }, [holdingInputs]);
 
   const latest = dataset.nav.at(-1)!;
   const snapshot = latest;
@@ -131,7 +141,6 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
     () => ASSETS.reduce((total, asset) => total + holdingAmounts[asset.key], 0),
     [holdingAmounts],
   );
-  const hasHoldingInputs = ASSETS.some((asset) => holdingInputs[asset.key].trim() !== "");
   const strategyRows = useMemo(
     () => ASSETS.map((asset) => ({ key: asset.key, weight: snapshot.weights[asset.key] })),
     [snapshot.weights],
@@ -220,26 +229,6 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
 
   function updateHolding(key: AssetKey, value: string) {
     setHoldingInputs((current) => ({ ...current, [key]: value }));
-    setSaveStatus("idle");
-  }
-
-  function saveHoldings() {
-    try {
-      window.localStorage.setItem(HOLDINGS_STORAGE_KEY, JSON.stringify(holdingInputs));
-      setSaveStatus("saved");
-    } catch {
-      setSaveStatus("error");
-    }
-  }
-
-  function clearHoldings() {
-    setHoldingInputs(emptyHoldingInputs());
-    setSaveStatus("idle");
-    try {
-      window.localStorage.removeItem(HOLDINGS_STORAGE_KEY);
-    } catch {
-      // 页面数据仍可正常清空，本地存储不可用时无需阻塞计算器。
-    }
   }
 
   return (
@@ -253,11 +242,6 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
               mode={mode}
               onModeChange={setMode}
               totalCapital={totalCapital}
-              canClear={hasHoldingInputs}
-              canSave={hasHoldingInputs}
-              saveStatus={saveStatus}
-              onSave={saveHoldings}
-              onClear={clearHoldings}
             />
             <div className="rebalance-table-scroll overflow-x-auto">
               <table className="rebalance-calculation-table w-full min-w-[720px] border-collapse">
@@ -458,57 +442,19 @@ function RebalanceModeBar({
   mode,
   onModeChange,
   totalCapital,
-  canClear,
-  canSave,
-  saveStatus = "idle",
-  onSave,
-  onClear,
 }: {
   mode: Mode;
   onModeChange: (value: Mode) => void;
   totalCapital?: number;
-  canClear?: boolean;
-  canSave?: boolean;
-  saveStatus?: "idle" | "saved" | "error";
-  onSave?: () => void;
-  onClear?: () => void;
 }) {
   return (
     <div className="rebalance-mode-bar">
       <SegmentedControl value={mode} options={MODE_OPTIONS} onChange={onModeChange} label="调仓周期" />
-      {(totalCapital !== undefined || onSave || onClear) && (
+      {totalCapital !== undefined && (
         <div className="rebalance-mode-actions">
-          {totalCapital !== undefined && (
-            <div className="rebalance-total">
-              <span>总资金</span>
-              <strong>{formatCurrency(totalCapital)}</strong>
-            </div>
-          )}
-          <div className="rebalance-data-buttons">
-            {onSave && (
-              <button
-                type="button"
-                className={`save-data-button ${saveStatus === "error" ? "save-data-button-error" : ""}`}
-                onClick={onSave}
-                disabled={!canSave || saveStatus === "saved"}
-              >
-                {saveStatus === "saved" ? <Check size={15} strokeWidth={2} /> : <Save size={15} strokeWidth={1.8} />}
-                <span aria-live="polite">
-                  {saveStatus === "saved" ? "已保存" : saveStatus === "error" ? "保存失败" : "保存数据"}
-                </span>
-              </button>
-            )}
-            {onClear && (
-              <button
-                type="button"
-                className="clear-data-button"
-                onClick={onClear}
-                disabled={!canClear}
-              >
-                <Trash2 size={15} strokeWidth={1.8} />
-                <span>清空数据</span>
-              </button>
-            )}
+          <div className="rebalance-total">
+            <span>总资金</span>
+            <strong>{formatCurrency(totalCapital)}</strong>
           </div>
         </div>
       )}
