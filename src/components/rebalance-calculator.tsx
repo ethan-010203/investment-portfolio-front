@@ -268,7 +268,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
               </colgroup>
               <thead>
                 <tr className="border-b border-[var(--line)] text-[var(--muted)]">
-                  <th className="px-4 py-3 text-center font-medium">资产</th>
+                  <th className="px-6 py-3 text-left font-medium">资产</th>
                   <th className="px-4 py-3 text-center font-medium">持有金额</th>
                   <th className="px-4 py-3 text-center font-medium">当前策略占比</th>
                   <th className="px-4 py-3 text-center font-medium">调仓建议</th>
@@ -286,8 +286,8 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
                       : `卖出 ${formatCurrency(Math.abs(difference))}`;
                   return (
                     <tr key={row.key} className="table-row border-b border-[var(--line)] last:border-0">
-                      <td className="px-4 py-4 text-center">
-                        <div className="inline-flex items-center justify-center gap-3 text-left">
+                      <td className="px-6 py-4 text-left">
+                        <div className="flex items-center gap-3">
                           <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: asset.color }} />
                           <div>
                             <div className="rebalance-asset-code font-mono text-[var(--muted)]">{asset.code}</div>
