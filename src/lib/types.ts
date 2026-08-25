@@ -19,7 +19,14 @@ export type NavRecord = {
 
 export type NavSeriesRecord = Pick<
   NavRecord,
-  "date" | "dataThrough" | "grossReturn" | "costRate" | "netReturn" | "cumulativeNav"
+  | "date"
+  | "dataThrough"
+  | "assetReturns"
+  | "weights"
+  | "grossReturn"
+  | "costRate"
+  | "netReturn"
+  | "cumulativeNav"
 >;
 
 export type RebalanceEventSummary = {

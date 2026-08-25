@@ -1,11 +1,13 @@
 "use client";
 
 import * as echarts from "echarts";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useMemo, useState } from "react";
+import { ChevronDown, ChevronLeft, ChevronRight, ListFilter } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { EChart } from "@/components/echart";
 import { SegmentedControl } from "@/components/segmented-control";
+import { ASSETS, type AssetKey } from "@/lib/assets";
+import { buildSelectedCurve } from "@/lib/factor-curve";
 import { formatDate, formatNumber, formatPercent, returnTone } from "@/lib/format";
 import { calculateMetrics } from "@/lib/metrics";
 import type { NavSeriesRecord } from "@/lib/types";
@@ -32,6 +34,11 @@ function startDateForRange(latestDate: string, range: RangeKey): string {
 export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
   const [range, setRange] = useState<RangeKey>("all");
   const [page, setPage] = useState(1);
+  const [selectedFactors, setSelectedFactors] = useState<AssetKey[]>(() =>
+    ASSETS.map((asset) => asset.key),
+  );
+  const [factorMenuOpen, setFactorMenuOpen] = useState(false);
+  const factorSelectorRef = useRef<HTMLDivElement>(null);
 
   const filteredRows = useMemo(() => {
     const latestDate = rows.at(-1)!.date;
@@ -39,11 +46,30 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
     return rows.filter((row) => row.date >= startDate);
   }, [range, rows]);
 
-  const metrics = useMemo(() => calculateMetrics(filteredRows), [filteredRows]);
+  const selectedCurveRows = useMemo(
+    () => buildSelectedCurve(filteredRows, selectedFactors),
+    [filteredRows, selectedFactors],
+  );
+  const metrics = useMemo(() => calculateMetrics(selectedCurveRows), [selectedCurveRows]);
+  const selectedWeight = useMemo(() => {
+    const latestWeights = filteredRows.at(-1)?.weights;
+    if (!latestWeights) return 0;
+    return selectedFactors.reduce((sum, key) => sum + latestWeights[key], 0);
+  }, [filteredRows, selectedFactors]);
   const descendingRows = useMemo(() => [...filteredRows].reverse(), [filteredRows]);
   const totalPages = Math.max(1, Math.ceil(descendingRows.length / PAGE_SIZE));
   const visiblePage = Math.min(page, totalPages);
   const tableRows = descendingRows.slice((visiblePage - 1) * PAGE_SIZE, visiblePage * PAGE_SIZE);
+
+  useEffect(() => {
+    function closeOnOutsideClick(event: MouseEvent) {
+      if (factorSelectorRef.current && !factorSelectorRef.current.contains(event.target as Node)) {
+        setFactorMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", closeOnOutsideClick);
+    return () => document.removeEventListener("mousedown", closeOnOutsideClick);
+  }, []);
 
   const chartOption = useMemo<echarts.EChartsCoreOption>(
     () => ({
@@ -65,7 +91,7 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
       xAxis: {
         type: "category",
         boundaryGap: false,
-        data: filteredRows.map((row) => row.date),
+        data: selectedCurveRows.map((row) => row.date),
         axisLine: { show: false },
         axisTick: { show: false },
         axisLabel: {
@@ -88,7 +114,7 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
         {
           name: "累计净值",
           type: "line",
-          data: filteredRows.map((row) => row.cumulativeNav),
+          data: selectedCurveRows.map((row) => row.cumulativeNav),
           showSymbol: false,
           symbol: "circle",
           smooth: 0.18,
@@ -103,12 +129,22 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
         },
       ],
     }),
-    [filteredRows],
+    [selectedCurveRows],
   );
 
   function changeRange(next: RangeKey) {
     setRange(next);
     setPage(1);
+  }
+
+  function toggleFactor(key: AssetKey) {
+    setSelectedFactors((current) => {
+      if (current.includes(key)) {
+        if (current.length === 1) return current;
+        return current.filter((item) => item !== key);
+      }
+      return [...current, key];
+    });
   }
 
   return (
@@ -123,17 +159,58 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
       <section className="panel chart-card overflow-hidden">
         <div className="flex items-center justify-between gap-4 border-b border-[var(--line)] px-6 py-5 max-[600px]:items-start max-[600px]:flex-col">
           <div>
-            <h2 className="text-base font-semibold">累计净值走势</h2>
-            <div className="mt-1 text-xs text-[var(--muted)]">{filteredRows.length} 个交易日</div>
+            <h2 className="text-base font-semibold">选中因子组合走势</h2>
+            <div className="mt-1 text-xs text-[var(--muted)]">
+              已选 {selectedFactors.length} 项 · 当前策略权重 {formatPercent(selectedWeight)} · {filteredRows.length} 个交易日
+            </div>
           </div>
-          <SegmentedControl value={range} options={RANGE_OPTIONS} onChange={changeRange} label="净值区间" />
+          <div className="chart-controls">
+            <div ref={factorSelectorRef} className="factor-selector">
+              <button
+                type="button"
+                className="factor-selector-trigger"
+                aria-expanded={factorMenuOpen}
+                aria-haspopup="true"
+                onClick={() => setFactorMenuOpen((open) => !open)}
+              >
+                <ListFilter size={16} strokeWidth={2.2} />
+                <span>因子</span>
+                <span className="factor-count">{selectedFactors.length}/{ASSETS.length}</span>
+                <ChevronDown size={15} className={factorMenuOpen ? "rotate-180 transition-transform" : "transition-transform"} />
+              </button>
+              {factorMenuOpen && (
+                <div className="factor-selector-menu" role="menu" aria-label="选择净值因子">
+                  <div className="factor-menu-heading">选择组合因子</div>
+                  {ASSETS.map((asset) => {
+                    const checked = selectedFactors.includes(asset.key);
+                    const latestWeight = filteredRows.at(-1)?.weights[asset.key] ?? 0;
+                    return (
+                      <label key={asset.key} className="factor-option" role="menuitemcheckbox" aria-checked={checked}>
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          disabled={checked && selectedFactors.length === 1}
+                          onChange={() => toggleFactor(asset.key)}
+                        />
+                        <span className="asset-dot" style={{ backgroundColor: asset.color }} />
+                        <span className="factor-option-label">{asset.label}</span>
+                        <span className="factor-option-weight">{formatPercent(latestWeight, 1)}</span>
+                      </label>
+                    );
+                  })}
+                  <div className="factor-menu-note">按原策略权重合并，不重新分配未选资产</div>
+                </div>
+              )}
+            </div>
+            <SegmentedControl value={range} options={RANGE_OPTIONS} onChange={changeRange} label="净值区间" />
+          </div>
         </div>
-        <EChart option={chartOption} className="h-[390px] w-full max-[680px]:h-[300px]" label="累计净值走势图" />
+        <EChart option={chartOption} className="h-[390px] w-full max-[680px]:h-[300px]" label="选中因子组合净值走势图" />
       </section>
 
       <section className="panel table-card mt-5 overflow-hidden">
         <div className="flex items-center justify-between border-b border-[var(--line)] px-6 py-5">
-          <h2 className="text-base font-semibold">每日记录</h2>
+          <h2 className="text-base font-semibold">原策略每日记录</h2>
           <span className="text-xs text-[var(--muted)]">共 {descendingRows.length} 条</span>
         </div>
         <div className="overflow-x-auto">
