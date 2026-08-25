@@ -48,23 +48,29 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
   const chartOption = useMemo<echarts.EChartsCoreOption>(
     () => ({
       animationDuration: 500,
-      grid: { left: 16, right: 16, top: 24, bottom: 12, containLabel: true },
+      grid: { left: 18, right: 22, top: 24, bottom: 18, containLabel: true },
       tooltip: {
         trigger: "axis",
-        backgroundColor: "#1d1e1c",
+        backgroundColor: "rgba(32, 33, 36, 0.94)",
         borderWidth: 0,
-        padding: [9, 11],
+        padding: [11, 13],
+        borderRadius: 14,
         textStyle: { color: "#fffdf8", fontSize: 12 },
         valueFormatter: (value: unknown) => formatNumber(Number(value), 4),
+        axisPointer: {
+          type: "line",
+          lineStyle: { color: "#9db8c9", width: 1, type: "dashed" },
+        },
       },
       xAxis: {
         type: "category",
         boundaryGap: false,
         data: filteredRows.map((row) => row.date),
-        axisLine: { lineStyle: { color: "#cfcbc0" } },
+        axisLine: { show: false },
         axisTick: { show: false },
         axisLabel: {
           color: "#85847e",
+          margin: 15,
           hideOverlap: true,
           formatter: (value: string) => value.slice(0, 7).replace("-", "."),
         },
@@ -73,8 +79,10 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
         type: "value",
         scale: true,
         splitNumber: 4,
-        axisLabel: { color: "#85847e", formatter: (value: number) => value.toFixed(2) },
-        splitLine: { lineStyle: { color: "#e3e0d7", type: "dashed" } },
+        axisLine: { show: false },
+        axisTick: { show: false },
+        axisLabel: { color: "#85847e", margin: 12, formatter: (value: number) => value.toFixed(2) },
+        splitLine: { lineStyle: { color: "#e7ecea", width: 1 } },
       },
       series: [
         {
@@ -83,13 +91,13 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
           data: filteredRows.map((row) => row.cumulativeNav),
           showSymbol: false,
           symbol: "circle",
-          smooth: 0.12,
-          lineStyle: { color: "#335f88", width: 2.5 },
-          itemStyle: { color: "#335f88" },
+          smooth: 0.18,
+          lineStyle: { color: "#2f6288", width: 3, cap: "round", join: "round" },
+          itemStyle: { color: "#2f6288" },
           areaStyle: {
             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: "rgba(51, 95, 136, 0.23)" },
-              { offset: 1, color: "rgba(51, 95, 136, 0.01)" },
+              { offset: 0, color: "rgba(47, 98, 136, 0.12)" },
+              { offset: 1, color: "rgba(47, 98, 136, 0.015)" },
             ]),
           },
         },

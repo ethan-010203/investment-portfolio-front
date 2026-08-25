@@ -66,20 +66,23 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
       animationDuration: 450,
       tooltip: {
         trigger: "item",
-        backgroundColor: "#1d1e1c",
+        backgroundColor: "rgba(32, 33, 36, 0.94)",
         borderWidth: 0,
+        borderRadius: 14,
+        padding: [10, 12],
         textStyle: { color: "#fffdf8", fontSize: 12 },
         formatter: "{b}<br/>{d}%",
       },
       series: [
         {
           type: "pie",
-          radius: ["61%", "82%"],
+          radius: ["60%", "80%"],
           center: ["50%", "50%"],
           avoidLabelOverlap: true,
-          itemStyle: { borderColor: "#faf8f2", borderWidth: 2 },
+          padAngle: 2,
+          itemStyle: { borderColor: "#e8f3f7", borderWidth: 4 },
           label: { show: false },
-          emphasis: { scaleSize: 5 },
+          emphasis: { scale: true, scaleSize: 6 },
           data: allocations
             .filter((row) => row.weight > 0)
             .map((row) => ({
@@ -159,9 +162,9 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
             <div className="mt-2 min-h-5 text-xs text-[var(--positive)]">{inputError}</div>
           </form>
 
-          <div className="grid grid-cols-[220px_1fr] border-b border-[var(--line)] max-[680px]:grid-cols-1">
-            <div className="grid place-items-center bg-[var(--sky-card)] p-4 max-[680px]:border-r-0 max-[680px]:border-b">
-              <div className="relative size-[190px]">
+          <div className="grid grid-cols-[280px_1fr] border-b border-[var(--line)] max-[680px]:grid-cols-1">
+            <div className="bg-[var(--sky-card)] p-6 max-[680px]:border-r-0 max-[680px]:border-b">
+              <div className="relative mx-auto size-[224px]">
                 <EChart option={donutOption} className="size-full" label="资产配置占比图" />
                 <div className="pointer-events-none absolute inset-0 grid place-items-center text-center">
                   <div>
@@ -169,6 +172,20 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
                     <div className="mt-1 font-mono text-lg font-semibold">{formatNumber(snapshot.cumulativeNav, 4)}</div>
                   </div>
                 </div>
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2">
+                {allocations.map((row) => {
+                  const asset = ASSET_BY_KEY[row.key];
+                  return (
+                    <div key={row.key} className="flex min-w-0 items-center justify-between gap-2 text-xs">
+                      <span className="flex min-w-0 items-center gap-1.5">
+                        <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: asset.color }} />
+                        <span className="truncate text-[var(--muted)]">{asset.label}</span>
+                      </span>
+                      <span className="font-mono tabular-nums">{formatPercent(row.weight, 1)}</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
             <div className="grid grid-cols-2">
