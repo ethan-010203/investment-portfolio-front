@@ -417,33 +417,6 @@ header nav a:not([aria-current="page"]) {
   color: var(--foreground);
 }
 
-.home-hero {
-  background: var(--surface);
-  box-shadow: 0 20px 58px rgb(87 91 83 / 9%);
-}
-
-.home-hero-main {
-  background: var(--surface);
-}
-
-.home-hero-side {
-  background: var(--blue-card);
-}
-
-.action-card {
-  min-height: 142px;
-  border-radius: 26px;
-  box-shadow: 0 14px 36px rgb(87 91 83 / 6%);
-}
-
-.action-card-blue {
-  background: var(--blue-card);
-}
-
-.action-card-mint {
-  background: var(--mint-card);
-}
-
 .metric-card {
   min-height: 116px;
   border-radius: 24px;

@@ -200,11 +200,6 @@ const NAV_SNAPSHOT_SQL = `${NAV_SELECT}
     )
   ORDER BY "日期"`;
 
-const NAV_LATEST_SQL = `${NAV_SELECT}
-  WHERE "策略版本" = ?
-  ORDER BY "日期" DESC
-  LIMIT 1`;
-
 const EVENT_SUMMARY_SQL = `
   SELECT
     "策略版本" AS strategy_version,
@@ -239,16 +234,5 @@ export async function loadPortfolioDataset(): Promise<PortfolioDataset> {
     strategyVersion,
     nav: navRows.map(parseNav),
     events: eventRows.map(parseEventSummary),
-  };
-}
-
-export async function loadLatestSnapshot(): Promise<PortfolioDataset> {
-  const strategyVersion = await latestStrategyVersion();
-  const rows = await queryRows(NAV_LATEST_SQL, [strategyVersion]);
-  if (!rows[0]) throw new Error("当前策略版本没有净值记录");
-  return {
-    strategyVersion,
-    nav: [parseNav(rows[0])],
-    events: [],
   };
 }
