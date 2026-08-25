@@ -23,6 +23,61 @@ const EVENT_ASSET_COLORS = Object.fromEntries(
   ASSETS.map((asset) => [asset.label, asset.color]),
 ) as Record<string, string>;
 
+const PIE_DECALS = {
+  dividend: {
+    symbol: "rect",
+    symbolSize: 1,
+    color: "rgba(255, 255, 255, 0.48)",
+    dashArrayX: [1, 0],
+    dashArrayY: [5, 3],
+    rotation: -Math.PI / 4,
+  },
+  sp500: {
+    symbol: "circle",
+    symbolSize: 0.9,
+    color: "rgba(255, 255, 255, 0.58)",
+    dashArrayX: [1, 5],
+    dashArrayY: [1, 5],
+  },
+  nasdaq: {
+    symbol: "diamond",
+    symbolSize: 0.9,
+    color: "rgba(255, 255, 255, 0.58)",
+    dashArrayX: [1, 5],
+    dashArrayY: [1, 5],
+  },
+  policyBankBond: {
+    symbol: "rect",
+    symbolSize: 1,
+    color: "rgba(255, 255, 255, 0.48)",
+    dashArrayX: [1, 0],
+    dashArrayY: [4, 4],
+  },
+  gold: {
+    symbol: "triangle",
+    symbolSize: 0.9,
+    color: "rgba(255, 255, 255, 0.55)",
+    dashArrayX: [1, 5],
+    dashArrayY: [1, 5],
+  },
+  soymeal: {
+    symbol: "rect",
+    symbolSize: 1,
+    color: "rgba(255, 255, 255, 0.48)",
+    dashArrayX: [1, 0],
+    dashArrayY: [5, 3],
+    rotation: Math.PI / 2,
+  },
+  cash: {
+    symbol: ["rect", "circle"],
+    symbolSize: 0.75,
+    color: "rgba(255, 255, 255, 0.52)",
+    dashArrayX: [[1, 4], [1, 4]],
+    dashArrayY: [3, 3],
+    rotation: Math.PI / 4,
+  },
+};
+
 function emptyHoldingInputs(): Record<AssetKey, string> {
   return ASSETS.reduce(
     (values, asset) => {
@@ -78,7 +133,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
     return typeOrder[left.type] - typeOrder[right.type] || left.sequence - right.sequence;
   });
 
-  const donutOption = useMemo<echarts.EChartsCoreOption>(
+  const patternPieOption = useMemo<echarts.EChartsCoreOption>(
     () => ({
       animationDuration: 450,
       tooltip: {
@@ -93,19 +148,29 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
       series: [
         {
           type: "pie",
-          radius: ["60%", "80%"],
+          radius: "82%",
           center: ["50%", "50%"],
           avoidLabelOverlap: true,
-          padAngle: 2,
-          itemStyle: { borderColor: "#e8f3f7", borderWidth: 4 },
+          selectedMode: "single",
+          selectedOffset: 7,
+          padAngle: 1,
+          itemStyle: { borderColor: "#f7f2e9", borderWidth: 3, borderRadius: 3 },
           label: { show: false },
-          emphasis: { scale: true, scaleSize: 6 },
+          labelLine: { show: false },
+          emphasis: {
+            scale: true,
+            scaleSize: 5,
+            itemStyle: { shadowBlur: 12, shadowColor: "rgba(54, 63, 69, 0.18)" },
+          },
           data: allocations
             .filter((row) => row.weight > 0)
             .map((row) => ({
               name: ASSET_BY_KEY[row.key].label,
               value: Number((row.weight * 100).toFixed(6)),
-              itemStyle: { color: ASSET_BY_KEY[row.key].color },
+              itemStyle: {
+                color: ASSET_BY_KEY[row.key].color,
+                decal: PIE_DECALS[row.key],
+              },
             })),
         },
       ],
@@ -199,7 +264,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
         <div className="rebalance-side-column">
           <section className="panel rebalance-pie-card overflow-hidden">
             <div className="rebalance-pie-chart">
-              <EChart option={donutOption} className="size-full" label="资产配置占比图" />
+              <EChart option={patternPieOption} className="size-full" label="资产配置占比图" />
             </div>
             <div className="rebalance-pie-legend">
               {allocations.map((row) => {
