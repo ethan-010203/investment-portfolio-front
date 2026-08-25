@@ -268,10 +268,10 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
               </colgroup>
               <thead>
                 <tr className="border-b border-[var(--line)] text-[var(--muted)]">
-                  <th className="px-6 py-3 text-left font-medium">资产</th>
-                  <th className="px-4 py-3 text-center font-medium">持有金额</th>
-                  <th className="px-4 py-3 text-center font-medium">当前策略占比</th>
-                  <th className="px-4 py-3 text-center font-medium">调仓建议</th>
+                  <th className="px-6 py-3 text-left font-bold">资产</th>
+                  <th className="px-4 py-3 text-center font-bold">持有金额</th>
+                  <th className="px-4 py-3 text-center font-bold">当前策略占比</th>
+                  <th className="px-4 py-3 text-center font-bold">调仓建议</th>
                 </tr>
               </thead>
               <tbody>
