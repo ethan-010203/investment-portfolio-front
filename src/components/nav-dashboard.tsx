@@ -1,10 +1,12 @@
 "use client";
 
 import * as echarts from "echarts";
+import { CircleAlert } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { EChart } from "@/components/echart";
 import { useNetValueDateRange } from "@/components/net-value-date-range-context";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { ASSETS, type AssetKey } from "@/lib/assets";
 import { filterRowsByDateRange } from "@/lib/date-range";
@@ -285,43 +287,57 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
         <section className="net-value-side-card net-value-performance-card">
           <div className="net-value-side-card-body">
             <h2 className="net-value-side-card-title">绩效</h2>
-            <div className="net-value-metrics">
-              <Metric
-                label="累计净值"
-                value={formatNumber(metrics.cumulativeNav, 4)}
-                tone={returnTone(metrics.cumulativeNav - 1)}
-              />
-              <Metric
-                label="区间年化"
-                value={formatPercent(metrics.annualizedReturn)}
-                tone={returnTone(metrics.annualizedReturn)}
-              />
-              <Metric
-                label="年化波动率"
-                value={formatPercent(metrics.annualizedVolatility)}
-              />
-              <Metric
-                label="夏普比率"
-                value={formatNumber(metrics.sharpeRatio, 2)}
-                tone={returnTone(metrics.sharpeRatio)}
-              />
-              <Metric
-                label="卡玛比率"
-                value={formatNumber(metrics.calmarRatio, 2)}
-                tone={returnTone(metrics.calmarRatio)}
-              />
-              <Metric
-                label="区间最大回撤"
-                value={formatPercent(metrics.maximumDrawdown)}
-                tone="negative"
-              />
-              <Metric
-                className="metric-card-wide"
-                label="最大回撤天数"
-                value={`${metrics.maximumDrawdownDurationDays} 天`}
-                detail={`${formatDate(metrics.maximumDrawdownStartDate)} - ${formatDate(metrics.maximumDrawdownEndDate)}`}
-              />
-            </div>
+            <TooltipProvider delayDuration={180}>
+              <div className="net-value-metrics">
+                <Metric
+                  label="累计净值"
+                  value={formatNumber(metrics.cumulativeNav, 4)}
+                  tone={returnTone(metrics.cumulativeNav - 1)}
+                />
+                <Metric
+                  label="区间年化"
+                  value={formatPercent(metrics.annualizedReturn)}
+                  tone={returnTone(metrics.annualizedReturn)}
+                />
+                <Metric
+                  label="年化波动率"
+                  value={formatPercent(metrics.annualizedVolatility)}
+                  explanation={{
+                    formula: "日收益率标准差 × √252",
+                    description: "衡量收益上下波动的幅度，数值越低，通常代表走势越平稳。",
+                  }}
+                />
+                <Metric
+                  label="夏普比率"
+                  value={formatNumber(metrics.sharpeRatio, 2)}
+                  tone={returnTone(metrics.sharpeRatio)}
+                  explanation={{
+                    formula: "日均收益率 ÷ 日收益率标准差 × √252",
+                    description: "表示每承担一份波动获得多少收益。当前按无风险收益率为 0 计算，通常越高越好。",
+                  }}
+                />
+                <Metric
+                  label="卡玛比率"
+                  value={formatNumber(metrics.calmarRatio, 2)}
+                  tone={returnTone(metrics.calmarRatio)}
+                  explanation={{
+                    formula: "区间年化收益率 ÷ |区间最大回撤|",
+                    description: "表示每承受一份最大回撤获得多少年化收益，通常越高越好。",
+                  }}
+                />
+                <Metric
+                  label="区间最大回撤"
+                  value={formatPercent(metrics.maximumDrawdown)}
+                  tone="negative"
+                />
+                <Metric
+                  className="metric-card-wide"
+                  label="最大回撤天数"
+                  value={`${metrics.maximumDrawdownDurationDays} 天`}
+                  detail={`${formatDate(metrics.maximumDrawdownStartDate)} - ${formatDate(metrics.maximumDrawdownEndDate)}`}
+                />
+              </div>
+            </TooltipProvider>
           </div>
         </section>
 
@@ -383,17 +399,50 @@ function Metric({
   value,
   detail,
   tone = "neutral",
+  explanation,
 }: {
   className?: string;
   label: string;
   value: string;
   detail?: string;
   tone?: "positive" | "negative" | "neutral";
+  explanation?: {
+    formula: string;
+    description: string;
+  };
 }) {
   return (
     <div className={`metric-card ${className}`}>
       <div className="metric-title-row">
         <span className="metric-label">{label}</span>
+        {explanation && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                className="metric-info-trigger"
+                aria-label={`查看${label}计算说明`}
+              >
+                <CircleAlert aria-hidden="true" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent
+              className="metric-info-tooltip"
+              arrowClassName="metric-info-tooltip-arrow"
+              side="right"
+              sideOffset={8}
+            >
+              <div className="metric-info-section">
+                <strong>计算公式</strong>
+                <p className="metric-info-formula">{explanation.formula}</p>
+              </div>
+              <div className="metric-info-section">
+                <strong>简单理解</strong>
+                <p>{explanation.description}</p>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        )}
       </div>
       <div className={`metric-value-row font-mono font-semibold tabular-nums ${tone}`}>
         <span>{value}</span>

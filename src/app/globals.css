@@ -288,6 +288,82 @@ select:focus-visible {
   align-items: center;
 }
 
+.metric-info-trigger {
+  display: inline-grid;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  place-items: center;
+  margin-left: 5px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  padding: 0;
+  color: #202124;
+  cursor: help;
+}
+
+.metric-info-trigger svg {
+  width: 13px;
+  height: 13px;
+  stroke-width: 2.25;
+}
+
+.metric-info-trigger:hover,
+.metric-info-trigger:focus-visible,
+.metric-info-trigger[data-state="delayed-open"],
+.metric-info-trigger[data-state="instant-open"] {
+  background: rgb(32 33 36 / 7%);
+  box-shadow: none;
+  outline: none;
+}
+
+.metric-info-trigger:focus-visible {
+  outline: 2px solid rgb(47 98 136 / 36%);
+  outline-offset: 2px;
+}
+
+.metric-info-tooltip {
+  display: block;
+  width: min(260px, calc(100vw - 24px));
+  max-width: 260px;
+  border: 1px solid #e4dfd4;
+  border-radius: 14px;
+  background: #fffdf8;
+  padding: 12px 14px;
+  color: var(--foreground);
+  box-shadow: 0 12px 32px rgb(67 62 52 / 12%);
+}
+
+.metric-info-tooltip-arrow {
+  fill: #fffdf8;
+}
+
+.metric-info-section + .metric-info-section {
+  margin-top: 9px;
+}
+
+.metric-info-section strong {
+  display: block;
+  color: var(--foreground);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.metric-info-section p {
+  margin: 3px 0 0;
+  color: #626761;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.metric-info-section .metric-info-formula {
+  color: #353833;
+  font-family: var(--font-geist-mono), monospace;
+  font-weight: 600;
+}
+
 .net-value-sidebar .metric-label {
   color: var(--muted);
   font-size: 12px;
