@@ -1,7 +1,7 @@
 "use client";
 
 import * as echarts from "echarts";
-import { CalendarDays, ChevronDown, ListFilter } from "lucide-react";
+import { ChevronDown, ListFilter } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { EChart } from "@/components/echart";
@@ -11,49 +11,27 @@ import { formatNumber, formatPercent, returnTone } from "@/lib/format";
 import { calculateMetrics } from "@/lib/metrics";
 import type { NavSeriesRecord } from "@/lib/types";
 
-type RangeKey = "1y" | "3y" | "5y" | "all";
-
-const RANGE_OPTIONS = [
-  { value: "1y", label: "近1年" },
-  { value: "3y", label: "近3年" },
-  { value: "5y", label: "近5年" },
-  { value: "all", label: "全部" },
-] as const;
-
 const SELECTABLE_ASSETS = ASSETS.filter((asset) => asset.key !== "cash");
 
-function startDateForRange(latestDate: string, range: RangeKey): string {
-  if (range === "all") return "0000-01-01";
-  const years = Number(range[0]);
-  const date = new Date(`${latestDate}T00:00:00Z`);
-  date.setUTCFullYear(date.getUTCFullYear() - years);
-  return date.toISOString().slice(0, 10);
-}
-
 export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
-  const [range, setRange] = useState<RangeKey>("all");
   const [selectedAssets, setSelectedAssets] = useState<AssetKey[]>(() =>
     SELECTABLE_ASSETS.map((asset) => asset.key),
   );
   const [assetMenuOpen, setAssetMenuOpen] = useState(false);
   const assetSelectorRef = useRef<HTMLDivElement>(null);
 
-  const filteredRows = useMemo(() => {
-    const latestDate = rows.at(-1)!.date;
-    const startDate = startDateForRange(latestDate, range);
-    return rows.filter((row) => row.date >= startDate);
-  }, [range, rows]);
+  const seriesRows = rows;
 
   const selectedCurveRows = useMemo(
-    () => buildSelectedCurve(filteredRows, selectedAssets),
-    [filteredRows, selectedAssets],
+    () => buildSelectedCurve(seriesRows, selectedAssets),
+    [seriesRows, selectedAssets],
   );
   const metrics = useMemo(() => calculateMetrics(selectedCurveRows), [selectedCurveRows]);
   const selectedWeight = useMemo(() => {
-    const latestWeights = filteredRows.at(-1)?.weights;
+    const latestWeights = seriesRows.at(-1)?.weights;
     if (!latestWeights) return 0;
     return selectedAssets.reduce((sum, key) => sum + latestWeights[key], 0);
-  }, [filteredRows, selectedAssets]);
+  }, [seriesRows, selectedAssets]);
   useEffect(() => {
     function closeOnOutsideClick(event: MouseEvent) {
       if (assetSelectorRef.current && !assetSelectorRef.current.contains(event.target as Node)) {
@@ -67,7 +45,7 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
   const lineChartOption = useMemo<echarts.EChartsCoreOption>(
     () => ({
       animationDuration: 500,
-      grid: { left: 18, right: 22, top: 24, bottom: 18, containLabel: true },
+      grid: { left: 18, right: 22, top: 24, bottom: 68, containLabel: true },
       tooltip: {
         trigger: "axis",
         backgroundColor: "rgba(32, 33, 36, 0.94)",
@@ -81,6 +59,32 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
           lineStyle: { color: "#9db8c9", width: 1, type: "dashed" },
         },
       },
+      dataZoom: [
+        {
+          type: "inside",
+          xAxisIndex: 0,
+          start: Math.max(0, 100 - (30 / Math.max(selectedCurveRows.length, 30)) * 100),
+          end: 100,
+          zoomOnMouseWheel: true,
+          moveOnMouseMove: true,
+        },
+        {
+          type: "slider",
+          xAxisIndex: 0,
+          height: 20,
+          bottom: 13,
+          borderColor: "transparent",
+          backgroundColor: "#eef2f0",
+          fillerColor: "rgba(47, 98, 136, 0.16)",
+          handleSize: "115%",
+          handleStyle: { color: "#2f6288", borderWidth: 0 },
+          moveHandleStyle: { color: "#9db8c9" },
+          dataBackground: {
+            lineStyle: { color: "#b8ccda", width: 1 },
+            areaStyle: { color: "rgba(184, 204, 218, 0.18)" },
+          },
+        },
+      ],
       xAxis: {
         type: "category",
         boundaryGap: false,
@@ -216,10 +220,6 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
     [selectedCurveRows],
   );
 
-  function changeRange(next: RangeKey) {
-    setRange(next);
-  }
-
   function toggleAsset(key: AssetKey) {
     setSelectedAssets((current) => {
       if (current.includes(key)) {
@@ -263,7 +263,7 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
                   <div className="asset-menu-heading">选择组合品种</div>
                   {SELECTABLE_ASSETS.map((asset) => {
                     const checked = selectedAssets.includes(asset.key);
-                    const latestWeight = filteredRows.at(-1)?.weights[asset.key] ?? 0;
+                    const latestWeight = seriesRows.at(-1)?.weights[asset.key] ?? 0;
                     return (
                       <label key={asset.key} className="asset-option" role="menuitemcheckbox" aria-checked={checked}>
                         <input
@@ -283,22 +283,6 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
             </div>
           </div>
 
-          <div className="net-value-control">
-            <span className="net-value-control-label">日期范围</span>
-            <div className="date-range-control">
-              <select
-                className="date-range-select"
-                value={range}
-                aria-label="日期范围"
-                onChange={(event) => changeRange(event.target.value as RangeKey)}
-              >
-                {RANGE_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </select>
-              <CalendarDays size={16} className="date-range-icon" />
-            </div>
-          </div>
         </div>
       </aside>
 
@@ -307,7 +291,7 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
           <div className="net-value-chart-header">
             <div>
               <h2>累计净值走势</h2>
-              <p>已选 {selectedAssets.length} 项 · 当前策略权重 {formatPercent(selectedWeight)} · {filteredRows.length} 个交易日</p>
+              <p>已选 {selectedAssets.length} 项 · 当前策略权重 {formatPercent(selectedWeight)} · {seriesRows.length} 个交易日</p>
             </div>
           </div>
           <EChart option={lineChartOption} className="net-value-chart-canvas" label="选中品种组合累计净值折线图" />
