@@ -73,10 +73,6 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
     [totalCapital, snapshot],
   );
   const tradeThreshold = totalCapital * 0.003;
-  const totalTrade = allocations.reduce((total, row) => {
-    const difference = row.amount - holdingAmounts[row.key];
-    return total + (Math.abs(difference) > tradeThreshold ? Math.abs(difference) : 0);
-  }, 0);
   const eventsThroughSnapshot = useMemo(
     () => riskEventsForDate(dataset.events, snapshot.date),
     [dataset.events, snapshot.date],
@@ -180,9 +176,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
                 <tr className="border-b border-[var(--line)] text-xs text-[var(--muted)]">
                   <th className="px-6 py-3 font-medium">资产</th>
                   <th className="px-4 py-3 text-right font-medium">持有金额</th>
-                  <th className="px-4 py-3 text-right font-medium">实际占比</th>
-                  <th className="px-4 py-3 text-right font-medium">策略占比</th>
-                  <th className="px-6 py-3 text-right font-medium">配置金额</th>
+                  <th className="px-4 py-3 text-right font-medium">当前策略占比</th>
                   <th className="px-6 py-3 text-right font-medium">调仓建议</th>
                 </tr>
               </thead>
@@ -190,7 +184,6 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
                 {allocations.map((row) => {
                   const asset = ASSET_BY_KEY[row.key];
                   const holdingAmount = holdingAmounts[row.key];
-                  const actualWeight = totalCapital > 0 ? holdingAmount / totalCapital : 0;
                   const difference = row.amount - holdingAmount;
                   const action = totalCapital <= 0
                     ? "待输入"
@@ -224,9 +217,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
                           />
                         </div>
                       </td>
-                      <td className="px-4 py-4 text-right font-mono text-sm font-medium tabular-nums">{formatPercent(actualWeight)}</td>
                       <td className="px-4 py-4 text-right font-mono text-sm font-medium tabular-nums">{formatPercent(row.weight)}</td>
-                      <td className="px-6 py-4 text-right font-mono text-sm font-semibold tabular-nums">{formatCurrency(row.amount)}</td>
                       <td className={`px-6 py-4 text-right font-mono text-sm font-semibold tabular-nums ${difference > tradeThreshold ? "positive" : difference < -tradeThreshold ? "negative" : "neutral"}`}>
                         {action}
                       </td>
@@ -234,16 +225,6 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
                   );
                 })}
               </tbody>
-              <tfoot>
-                <tr>
-                  <td className="px-6 py-4 text-sm font-semibold">合计</td>
-                  <td className="px-4 py-4 text-right font-mono text-sm font-semibold">{formatCurrency(totalCapital)}</td>
-                  <td className="px-4 py-4 text-right font-mono text-sm font-semibold">100.00%</td>
-                  <td className="px-4 py-4 text-right font-mono text-sm font-semibold">100.00%</td>
-                  <td className="px-6 py-4 text-right font-mono text-sm font-semibold">{formatCurrency(totalCapital)}</td>
-                  <td className="px-6 py-4 text-right font-mono text-sm font-semibold">{formatCurrency(totalTrade)}</td>
-                </tr>
-              </tfoot>
             </table>
           </div>
         </section>
