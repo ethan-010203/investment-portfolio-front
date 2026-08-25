@@ -73,8 +73,8 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
 
   const chartOption = useMemo<echarts.EChartsCoreOption>(
     () => ({
-      animationDuration: 500,
-      grid: { left: 18, right: 22, top: 24, bottom: 18, containLabel: true },
+      animationDuration: 350,
+      grid: { left: 18, right: 22, top: 18, bottom: 68, containLabel: true },
       tooltip: {
         trigger: "axis",
         backgroundColor: "rgba(32, 33, 36, 0.94)",
@@ -82,15 +82,41 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
         padding: [11, 13],
         borderRadius: 14,
         textStyle: { color: "#fffdf8", fontSize: 12 },
-        valueFormatter: (value: unknown) => formatNumber(Number(value), 4),
+        valueFormatter: (value: unknown) => formatPercent(Number(value)),
         axisPointer: {
-          type: "line",
+          type: "shadow",
           lineStyle: { color: "#9db8c9", width: 1, type: "dashed" },
         },
       },
+      dataZoom: [
+        {
+          type: "inside",
+          xAxisIndex: 0,
+          start: Math.max(0, 100 - (30 / Math.max(selectedCurveRows.length, 30)) * 100),
+          end: 100,
+          zoomOnMouseWheel: true,
+          moveOnMouseMove: true,
+        },
+        {
+          type: "slider",
+          xAxisIndex: 0,
+          height: 20,
+          bottom: 13,
+          borderColor: "transparent",
+          backgroundColor: "#eef2f0",
+          fillerColor: "rgba(47, 98, 136, 0.16)",
+          handleSize: "115%",
+          handleStyle: { color: "#2f6288", borderWidth: 0 },
+          moveHandleStyle: { color: "#9db8c9" },
+          dataBackground: {
+            lineStyle: { color: "#b8ccda", width: 1 },
+            areaStyle: { color: "rgba(184, 204, 218, 0.18)" },
+          },
+        },
+      ],
       xAxis: {
         type: "category",
-        boundaryGap: false,
+        boundaryGap: true,
         data: selectedCurveRows.map((row) => row.date),
         axisLine: { show: false },
         axisTick: { show: false },
@@ -107,24 +133,28 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
         splitNumber: 4,
         axisLine: { show: false },
         axisTick: { show: false },
-        axisLabel: { color: "#85847e", margin: 12, formatter: (value: number) => value.toFixed(2) },
+        axisLabel: { color: "#85847e", margin: 12, formatter: (value: number) => formatPercent(value) },
         splitLine: { lineStyle: { color: "#e7ecea", width: 1 } },
       },
       series: [
         {
-          name: "累计净值",
-          type: "line",
-          data: selectedCurveRows.map((row) => row.cumulativeNav),
-          showSymbol: false,
-          symbol: "circle",
-          smooth: 0.18,
-          lineStyle: { color: "#2f6288", width: 3, cap: "round", join: "round" },
-          itemStyle: { color: "#2f6288" },
-          areaStyle: {
-            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: "rgba(47, 98, 136, 0.12)" },
-              { offset: 1, color: "rgba(47, 98, 136, 0.015)" },
-            ]),
+          name: "当日收益率",
+          type: "bar",
+          barMaxWidth: 18,
+          barMinHeight: 2,
+          data: selectedCurveRows.map((row) => ({
+            value: row.netReturn,
+            itemStyle: {
+              color: row.netReturn >= 0 ? "#c84f3d" : "#16805f",
+              borderRadius: row.netReturn >= 0 ? [4, 4, 0, 0] : [0, 0, 4, 4],
+            },
+          })),
+          markLine: {
+            silent: true,
+            symbol: "none",
+            label: { show: false },
+            lineStyle: { color: "#aeb9b4", width: 1 },
+            data: [{ yAxis: 0 }],
           },
         },
       ],
@@ -159,7 +189,7 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
       <section className="panel chart-card overflow-hidden">
         <div className="flex items-center justify-between gap-4 border-b border-[var(--line)] px-6 py-5 max-[600px]:items-start max-[600px]:flex-col">
           <div>
-            <h2 className="text-base font-semibold">选中因子组合走势</h2>
+            <h2 className="text-base font-semibold">组合净值日度收益率</h2>
             <div className="mt-1 text-xs text-[var(--muted)]">
               已选 {selectedFactors.length} 项 · 当前策略权重 {formatPercent(selectedWeight)} · {filteredRows.length} 个交易日
             </div>
@@ -205,7 +235,7 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
             <SegmentedControl value={range} options={RANGE_OPTIONS} onChange={changeRange} label="净值区间" />
           </div>
         </div>
-        <EChart option={chartOption} className="h-[390px] w-full max-[680px]:h-[300px]" label="选中因子组合净值走势图" />
+        <EChart option={chartOption} className="h-[390px] w-full max-[680px]:h-[300px]" label="选中因子组合日度收益率柱状图" />
       </section>
 
       <section className="panel table-card mt-5 overflow-hidden">
