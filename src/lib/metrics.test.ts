@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { calculateMetrics } from "@/lib/metrics";
+import { calculateDrawdownDurationSeries, calculateMetrics } from "@/lib/metrics";
 import type { NavSeriesRecord, WeightMap } from "@/lib/types";
 
 const weights: WeightMap = {
@@ -34,6 +34,20 @@ function row(date: string, cumulativeNav: number, netReturn: number): NavSeriesR
 }
 
 describe("净值风险指标", () => {
+  it("计算每个日期距离最近历史高点的回撤自然日数", () => {
+    const rows = [
+      row("2025-01-01", 1, 0),
+      row("2025-01-02", 1.1, 0.1),
+      row("2025-01-03", 1, -0.09090909),
+      row("2025-01-05", 1.05, 0.05),
+      row("2025-01-08", 1.1, 0.04761905),
+      row("2025-01-09", 1.08, -0.01818182),
+    ];
+
+    expect(calculateDrawdownDurationSeries(rows)).toEqual([0, 0, 1, 3, 0, 1]);
+    expect(calculateDrawdownDurationSeries([])).toEqual([]);
+  });
+
   it("计算波动率、夏普、卡玛和最大回撤日期区间", () => {
     const metrics = calculateMetrics([
       row("2025-01-01", 1, 0),

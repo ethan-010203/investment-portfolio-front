@@ -8,7 +8,7 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { ASSETS, type AssetKey } from "@/lib/assets";
 import { buildSelectedCurve } from "@/lib/factor-curve";
 import { formatDate, formatNumber, formatPercent, returnTone } from "@/lib/format";
-import { calculateMetrics } from "@/lib/metrics";
+import { calculateDrawdownDurationSeries, calculateMetrics } from "@/lib/metrics";
 import type { NavSeriesRecord } from "@/lib/types";
 
 const SELECTABLE_ASSETS = ASSETS.filter((asset) => asset.key !== "cash");
@@ -50,6 +50,10 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
     [seriesRows, selectedAssets],
   );
   const metrics = useMemo(() => calculateMetrics(selectedCurveRows), [selectedCurveRows]);
+  const drawdownDurationSeries = useMemo(
+    () => calculateDrawdownDurationSeries(selectedCurveRows),
+    [selectedCurveRows],
+  );
 
   const lineChartOption = useMemo<echarts.EChartsCoreOption>(
     () => ({
@@ -65,7 +69,23 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
         borderRadius: 14,
         confine: true,
         textStyle: { color: "#fffdf8", fontSize: 12 },
-        valueFormatter: (value: unknown) => formatNumber(Number(value), 4),
+        formatter: (parameters: unknown) => {
+          const parameter = (Array.isArray(parameters) ? parameters[0] : parameters) as {
+            dataIndex?: number;
+          } | undefined;
+          const dataIndex = parameter?.dataIndex;
+          if (typeof dataIndex !== "number") return "";
+
+          const row = selectedCurveRows[dataIndex];
+          if (!row) return "";
+
+          const drawdownDays = drawdownDurationSeries[dataIndex] ?? 0;
+          return [
+            `<div style="margin-bottom:7px;color:#e7e7e3">${row.date}</div>`,
+            `<div style="display:flex;min-width:154px;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#2f6288"></span><span style="flex:1">累计净值</span><strong>${formatNumber(row.cumulativeNav, 4)}</strong></div>`,
+            `<div style="display:flex;align-items:center;gap:7px;margin-top:6px"><span style="width:9px;height:9px;border-radius:50%;background:#aeb9b4"></span><span style="flex:1">当前回撤天数</span><strong>${drawdownDays} 天</strong></div>`,
+          ].join("");
+        },
         axisPointer: {
           type: "line",
           lineStyle: { color: "#9db8c9", width: 1, type: "dashed" },
@@ -139,7 +159,7 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
         },
       ],
     }),
-    [isMobile, selectedCurveRows],
+    [drawdownDurationSeries, isMobile, selectedCurveRows],
   );
 
   const barChartOption = useMemo<echarts.EChartsCoreOption>(

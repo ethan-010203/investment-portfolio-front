@@ -9,6 +9,29 @@ function calendarDaysBetween(startDate: string, endDate: string): number {
   );
 }
 
+/**
+ * 计算每个净值日期距离最近一次历史高点的自然日数。
+ * 净值创出或回到历史高点时，当前回撤天数归零。
+ */
+export function calculateDrawdownDurationSeries(
+  rows: readonly NavSeriesRecord[],
+): number[] {
+  if (rows.length === 0) return [];
+
+  let peak = rows[0].cumulativeNav;
+  let peakDate = rows[0].date;
+
+  return rows.map((row) => {
+    if (row.cumulativeNav >= peak) {
+      peak = row.cumulativeNav;
+      peakDate = row.date;
+      return 0;
+    }
+
+    return calendarDaysBetween(peakDate, row.date);
+  });
+}
+
 export function calculateMetrics(rows: readonly NavSeriesRecord[]): PortfolioMetrics {
   if (rows.length === 0) throw new Error("净值序列不能为空");
   const first = rows[0];
