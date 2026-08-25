@@ -1,7 +1,6 @@
 "use client";
 
 import * as echarts from "echarts";
-import { Activity, ArrowDownRight, ArrowUpRight, Clock3 } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { EChart } from "@/components/echart";
@@ -233,7 +232,6 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
           <Metric
             label="年化波动率"
             value={formatPercent(metrics.annualizedVolatility)}
-            status="risk"
           />
           <Metric
             label="夏普比率"
@@ -257,7 +255,6 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
             label="最大回撤天数"
             value={`${metrics.maximumDrawdownDurationDays} 天`}
             detail={`${formatDate(metrics.maximumDrawdownStartDate)} - ${formatDate(metrics.maximumDrawdownEndDate)}`}
-            status="duration"
           />
         </div>
 
@@ -320,25 +317,30 @@ function Metric({
   value: string;
   detail?: string;
   tone?: "positive" | "negative" | "neutral";
-  status: "up" | "down" | "risk" | "duration";
+  status?: "up" | "down";
 }) {
-  const StatusIcon = status === "up"
-    ? ArrowUpRight
-    : status === "down"
-      ? ArrowDownRight
-      : status === "duration"
-        ? Clock3
-        : Activity;
   return (
     <div className="metric-card px-6 py-6 max-[520px]:px-4">
       <div className="metric-title-row">
-        <span className={`metric-status-icon metric-status-${status}`} aria-hidden="true">
-          <StatusIcon size={14} strokeWidth={2.2} />
-        </span>
         <span className="metric-label">{label}</span>
       </div>
-      <div className={`mt-2 font-mono text-2xl font-semibold tabular-nums max-[520px]:text-xl ${tone}`}>{value}</div>
+      <div className={`metric-value-row font-mono font-semibold tabular-nums ${tone}`}>
+        <span>{value}</span>
+        {status && <TrendArrow direction={status} />}
+      </div>
       {detail && <div className="metric-detail">{detail}</div>}
     </div>
+  );
+}
+
+function TrendArrow({ direction }: { direction: "up" | "down" }) {
+  return (
+    <svg
+      className={`metric-trend-arrow metric-trend-${direction}`}
+      viewBox="0 0 1792 1792"
+      aria-hidden="true"
+    >
+      <path d="M1408 1216q0 26-19 45t-45 19H448q-26 0-45-19t-19-45 19-45l448-448q19-19 45-19t45 19l448 448q19 19 19 45z" />
+    </svg>
   );
 }
