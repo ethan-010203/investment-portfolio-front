@@ -245,7 +245,8 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
                       onChange={() => toggleAsset(asset.key)}
                     />
                     <span className="asset-dot" style={{ backgroundColor: asset.color }} />
-                    <span className="asset-option-label">{asset.label}</span>
+                    <span className="asset-option-code">{asset.code}</span>
+                    <span className="asset-option-label">{asset.name}</span>
                   </label>
                 );
               })}

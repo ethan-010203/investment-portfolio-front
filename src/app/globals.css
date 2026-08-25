@@ -83,7 +83,7 @@ select:focus-visible {
 
 .net-value-layout {
   display: grid;
-  grid-template-columns: 248px minmax(0, 1fr);
+  grid-template-columns: clamp(280px, 21vw, 320px) minmax(0, 1fr);
   gap: 18px;
   height: 100%;
   min-height: 0;
@@ -165,8 +165,8 @@ select:focus-visible {
 
 .asset-options-list {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
   width: 100%;
 }
 
@@ -175,7 +175,7 @@ select:focus-visible {
   min-width: 0;
   min-height: 44px;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   border-radius: 13px;
   padding: 0 10px;
   cursor: pointer;
@@ -192,6 +192,14 @@ select:focus-visible {
   height: 17px;
   margin: 0;
   accent-color: var(--blue-deep);
+}
+
+.asset-option-code {
+  min-width: 52px;
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
 }
 
 .asset-option-label {
