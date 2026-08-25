@@ -67,8 +67,6 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
   const cycleEvents = formalEvent
     ? eventsThroughSnapshot.filter((event) => event.cycleDate === formalEvent.cycleDate)
     : [];
-  const riskEvents = cycleEvents.filter((event) => event.type !== "正式调仓");
-  const latestRiskEvent = riskEvents.at(-1);
   const orderedCycleEvents = [...cycleEvents].sort((left, right) => {
     const dateOrder = left.executionDate.localeCompare(right.executionDate);
     if (dateOrder !== 0) return dateOrder;
@@ -197,19 +195,9 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
 
           <aside className="panel risk-card h-fit overflow-hidden">
           <div className="border-b border-[var(--line)] px-5 py-5">
-            <h2 className="text-base font-semibold">风控状态</h2>
+            <h2 className="text-lg font-semibold">本期事件</h2>
           </div>
-
-          <div className="border-b border-[var(--line)] px-5 py-5">
-            <div className="text-sm font-semibold">{latestRiskEvent ? "已执行风险调整" : "本周期正常运行"}</div>
-            <dl className="mt-5 space-y-3 text-sm">
-              <RiskRow label="正式调仓日" value={formalEvent ? formatDate(formalEvent.cycleDate) : "暂无"} />
-              <RiskRow label="数据截至" value={formatDate(snapshot.dataThrough)} />
-            </dl>
-          </div>
-
           <div className="px-5 py-5">
-            <div className="eyebrow">本期事件</div>
             <div className="mt-4">
               {orderedCycleEvents.map((event, index) => (
                 <div key={event.id} className="relative flex gap-3 pb-5 last:pb-0">
@@ -304,14 +292,5 @@ function HistoryRebalanceTable({ events }: { events: RebalanceEventSummary[] }) 
         </div>
       </div>
     </section>
-  );
-}
-
-function RiskRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between gap-4">
-      <dt className="text-[var(--muted)]">{label}</dt>
-      <dd className="font-medium">{value}</dd>
-    </div>
   );
 }
