@@ -36,16 +36,22 @@ const PIE_COLORS: Record<AssetKey, string> = {
 
 const PIE_TEXTURE = {
   symbol: ["rect", "rect", "circle"],
-  symbolSize: 0.55,
+  symbolSize: 0.62,
   symbolKeepAspect: true,
   color: "rgba(34, 42, 46, 0.2)",
-  backgroundColor: "rgba(255, 255, 255, 0.05)",
-  dashArrayX: [[1, 1, 2, 1], [2, 0.8, 1, 1.2], [1.3, 0.7]],
-  dashArrayY: [1, 1.2, 0.8, 1.4],
+  dashArrayX: [[2, 1, 3, 1], [3, 1, 2, 1], [2, 2]],
+  dashArrayY: [2, 1, 2, 1],
   rotation: -Math.PI / 8,
   maxTileWidth: 96,
   maxTileHeight: 96,
 };
+
+const PIE_TEXTURES = Object.fromEntries(
+  ASSETS.map((asset) => [
+    asset.key,
+    { ...PIE_TEXTURE, backgroundColor: PIE_COLORS[asset.key] },
+  ]),
+);
 
 function emptyHoldingInputs(): Record<AssetKey, string> {
   return ASSETS.reduce(
@@ -194,7 +200,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
             .map((row) => ({
               name: ASSET_BY_KEY[row.key].label,
               value: Number((row.weight * 100).toFixed(6)),
-              itemStyle: { color: PIE_COLORS[row.key], decal: PIE_TEXTURE },
+              itemStyle: { color: PIE_COLORS[row.key], decal: PIE_TEXTURES[row.key] },
               labelLine: { lineStyle: { color: PIE_COLORS[row.key] } },
             })),
         },
