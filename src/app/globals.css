@@ -19,6 +19,8 @@
   --lavender-card: #e9e4f5;
   --positive: #c8483f;
   --negative: #16805f;
+  --scrollbar-thumb: rgb(79 82 79 / 46%);
+  --scrollbar-thumb-hover: rgb(47 50 48 / 64%);
   --shadow: 0 16px 44px rgb(61 65 61 / 7%);
   --shadow-hover: 0 18px 52px rgb(61 65 61 / 12%);
 }
@@ -32,6 +34,37 @@
 
 * {
   box-sizing: border-box;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+  scrollbar-width: thin;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track,
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  min-height: 40px;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: var(--scrollbar-thumb);
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 html {
