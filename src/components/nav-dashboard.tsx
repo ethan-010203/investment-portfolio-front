@@ -1,14 +1,13 @@
 "use client";
 
 import * as echarts from "echarts";
-import { ChevronDown, ListFilter } from "lucide-react";
+import { CalendarDays, ChevronDown, ListFilter } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { EChart } from "@/components/echart";
-import { SegmentedControl } from "@/components/segmented-control";
 import { ASSETS, type AssetKey } from "@/lib/assets";
 import { buildSelectedCurve } from "@/lib/factor-curve";
-import { formatNumber, formatPercent, returnTone } from "@/lib/format";
+import { formatDate, formatNumber, formatPercent, returnTone } from "@/lib/format";
 import { calculateMetrics } from "@/lib/metrics";
 import type { NavSeriesRecord } from "@/lib/types";
 
@@ -21,6 +20,8 @@ const RANGE_OPTIONS = [
   { value: "all", label: "全部" },
 ] as const;
 
+const SELECTABLE_ASSETS = ASSETS.filter((asset) => asset.key !== "cash");
+
 function startDateForRange(latestDate: string, range: RangeKey): string {
   if (range === "all") return "0000-01-01";
   const years = Number(range[0]);
@@ -31,11 +32,11 @@ function startDateForRange(latestDate: string, range: RangeKey): string {
 
 export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
   const [range, setRange] = useState<RangeKey>("all");
-  const [selectedFactors, setSelectedFactors] = useState<AssetKey[]>(() =>
-    ASSETS.map((asset) => asset.key),
+  const [selectedAssets, setSelectedAssets] = useState<AssetKey[]>(() =>
+    SELECTABLE_ASSETS.map((asset) => asset.key),
   );
-  const [factorMenuOpen, setFactorMenuOpen] = useState(false);
-  const factorSelectorRef = useRef<HTMLDivElement>(null);
+  const [assetMenuOpen, setAssetMenuOpen] = useState(false);
+  const assetSelectorRef = useRef<HTMLDivElement>(null);
 
   const filteredRows = useMemo(() => {
     const latestDate = rows.at(-1)!.date;
@@ -44,19 +45,19 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
   }, [range, rows]);
 
   const selectedCurveRows = useMemo(
-    () => buildSelectedCurve(filteredRows, selectedFactors),
-    [filteredRows, selectedFactors],
+    () => buildSelectedCurve(filteredRows, selectedAssets),
+    [filteredRows, selectedAssets],
   );
   const metrics = useMemo(() => calculateMetrics(selectedCurveRows), [selectedCurveRows]);
   const selectedWeight = useMemo(() => {
     const latestWeights = filteredRows.at(-1)?.weights;
     if (!latestWeights) return 0;
-    return selectedFactors.reduce((sum, key) => sum + latestWeights[key], 0);
-  }, [filteredRows, selectedFactors]);
+    return selectedAssets.reduce((sum, key) => sum + latestWeights[key], 0);
+  }, [filteredRows, selectedAssets]);
   useEffect(() => {
     function closeOnOutsideClick(event: MouseEvent) {
-      if (factorSelectorRef.current && !factorSelectorRef.current.contains(event.target as Node)) {
-        setFactorMenuOpen(false);
+      if (assetSelectorRef.current && !assetSelectorRef.current.contains(event.target as Node)) {
+        setAssetMenuOpen(false);
       }
     }
     document.addEventListener("mousedown", closeOnOutsideClick);
@@ -219,8 +220,8 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
     setRange(next);
   }
 
-  function toggleFactor(key: AssetKey) {
-    setSelectedFactors((current) => {
+  function toggleAsset(key: AssetKey) {
+    setSelectedAssets((current) => {
       if (current.includes(key)) {
         if (current.length === 1) return current;
         return current.filter((item) => item !== key);
@@ -230,76 +231,113 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
   }
 
   return (
-    <>
-      <div className="mb-5 grid grid-cols-4 gap-3 max-[760px]:grid-cols-2">
-        <Metric label="累计净值" value={formatNumber(metrics.cumulativeNav, 4)} />
-        <Metric label="区间末日收益" value={formatPercent(metrics.latestReturn)} tone={returnTone(metrics.latestReturn)} />
-        <Metric label="区间年化" value={formatPercent(metrics.annualizedReturn)} tone={returnTone(metrics.annualizedReturn)} />
-        <Metric label="区间最大回撤" value={formatPercent(metrics.maximumDrawdown)} tone="negative" />
-      </div>
+    <div className="net-value-layout">
+      <aside className="net-value-sidebar">
+        <div className="net-value-sidebar-heading">
+          <span className="eyebrow">策略净值</span>
+          <h1>每日净值</h1>
+          <p>数据截至 {formatDate(rows.at(-1)!.dataThrough)}</p>
+        </div>
 
-      <section className="panel chart-card overflow-hidden">
-        <div className="flex items-center justify-between gap-4 border-b border-[var(--line)] px-6 py-5 max-[600px]:items-start max-[600px]:flex-col">
-          <div>
-            <h2 className="text-base font-semibold">累计净值走势</h2>
-            <div className="mt-1 text-xs text-[var(--muted)]">
-              已选 {selectedFactors.length} 项 · 当前策略权重 {formatPercent(selectedWeight)} · {filteredRows.length} 个交易日
-            </div>
+        <div className="net-value-control">
+          <span className="net-value-sidebar-label">净值口径</span>
+          <div className="net-value-identity">
+            <strong>组合净值</strong>
+            <span>正式策略</span>
           </div>
-          <div className="chart-controls">
-            <div ref={factorSelectorRef} className="factor-selector">
+        </div>
+
+        <div className="net-value-metrics">
+          <Metric label="累计净值" value={formatNumber(metrics.cumulativeNav, 4)} />
+          <Metric label="区间末日收益" value={formatPercent(metrics.latestReturn)} tone={returnTone(metrics.latestReturn)} />
+          <Metric label="区间年化" value={formatPercent(metrics.annualizedReturn)} tone={returnTone(metrics.annualizedReturn)} />
+          <Metric label="区间最大回撤" value={formatPercent(metrics.maximumDrawdown)} tone="negative" />
+        </div>
+
+        <div className="net-value-sidebar-controls">
+          <div className="net-value-control">
+            <span className="net-value-control-label">品种</span>
+            <div ref={assetSelectorRef} className="asset-selector">
               <button
                 type="button"
-                className="factor-selector-trigger"
-                aria-expanded={factorMenuOpen}
+                className="asset-selector-trigger"
+                aria-expanded={assetMenuOpen}
                 aria-haspopup="true"
-                onClick={() => setFactorMenuOpen((open) => !open)}
+                onClick={() => setAssetMenuOpen((open) => !open)}
               >
-                <ListFilter size={16} strokeWidth={2.2} />
-                <span>因子</span>
-                <span className="factor-count">{selectedFactors.length}/{ASSETS.length}</span>
-                <ChevronDown size={15} className={factorMenuOpen ? "rotate-180 transition-transform" : "transition-transform"} />
+                <span className="asset-selector-trigger-main">
+                  <ListFilter size={16} strokeWidth={2.2} />
+                  <span>选择品种</span>
+                  <span className="asset-count">{selectedAssets.length}/{SELECTABLE_ASSETS.length}</span>
+                </span>
+                <ChevronDown size={15} className={assetMenuOpen ? "rotate-180 transition-transform" : "transition-transform"} />
               </button>
-              {factorMenuOpen && (
-                <div className="factor-selector-menu" role="menu" aria-label="选择净值因子">
-                  <div className="factor-menu-heading">选择组合因子</div>
-                  {ASSETS.map((asset) => {
-                    const checked = selectedFactors.includes(asset.key);
+              {assetMenuOpen && (
+                <div className="asset-selector-menu" role="menu" aria-label="选择净值品种">
+                  <div className="asset-menu-heading">选择组合品种</div>
+                  {SELECTABLE_ASSETS.map((asset) => {
+                    const checked = selectedAssets.includes(asset.key);
                     const latestWeight = filteredRows.at(-1)?.weights[asset.key] ?? 0;
                     return (
-                      <label key={asset.key} className="factor-option" role="menuitemcheckbox" aria-checked={checked}>
+                      <label key={asset.key} className="asset-option" role="menuitemcheckbox" aria-checked={checked}>
                         <input
                           type="checkbox"
                           checked={checked}
-                          disabled={checked && selectedFactors.length === 1}
-                          onChange={() => toggleFactor(asset.key)}
+                          disabled={checked && selectedAssets.length === 1}
+                          onChange={() => toggleAsset(asset.key)}
                         />
                         <span className="asset-dot" style={{ backgroundColor: asset.color }} />
-                        <span className="factor-option-label">{asset.label}</span>
-                        <span className="factor-option-weight">{formatPercent(latestWeight, 1)}</span>
+                        <span className="asset-option-label">{asset.label}</span>
+                        <span className="asset-option-weight">{formatPercent(latestWeight, 1)}</span>
                       </label>
                     );
                   })}
-                  <div className="factor-menu-note">按原策略权重合并，不重新分配未选资产</div>
                 </div>
               )}
             </div>
-            <SegmentedControl value={range} options={RANGE_OPTIONS} onChange={changeRange} label="净值区间" />
           </div>
-        </div>
-        <EChart option={lineChartOption} className="h-[390px] w-full max-[680px]:h-[300px]" label="选中因子组合累计净值折线图" />
-      </section>
 
-      <section className="panel chart-card mt-5 overflow-hidden">
-        <div className="flex items-center justify-between border-b border-[var(--line)] px-6 py-5">
-          <div>
-            <h2 className="text-base font-semibold">组合净值日度收益率</h2>
-            <div className="mt-1 text-xs text-[var(--muted)]">{selectedCurveRows.length} 个交易日</div>
+          <div className="net-value-control">
+            <span className="net-value-control-label">日期范围</span>
+            <div className="date-range-control">
+              <select
+                className="date-range-select"
+                value={range}
+                aria-label="日期范围"
+                onChange={(event) => changeRange(event.target.value as RangeKey)}
+              >
+                {RANGE_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
+              <CalendarDays size={16} className="date-range-icon" />
+            </div>
           </div>
         </div>
-        <EChart option={barChartOption} className="h-[390px] w-full max-[680px]:h-[300px]" label="选中因子组合日度收益率柱状图" />
-      </section>
-    </>
+      </aside>
+
+      <div className="net-value-charts">
+        <section className="panel net-value-chart-panel overflow-hidden">
+          <div className="net-value-chart-header">
+            <div>
+              <h2>累计净值走势</h2>
+              <p>已选 {selectedAssets.length} 项 · 当前策略权重 {formatPercent(selectedWeight)} · {filteredRows.length} 个交易日</p>
+            </div>
+          </div>
+          <EChart option={lineChartOption} className="net-value-chart-canvas" label="选中品种组合累计净值折线图" />
+        </section>
+
+        <section className="panel net-value-chart-panel overflow-hidden">
+          <div className="net-value-chart-header">
+            <div>
+              <h2>组合净值日度收益率</h2>
+              <p>{selectedCurveRows.length} 个交易日</p>
+            </div>
+          </div>
+          <EChart option={barChartOption} className="net-value-chart-canvas" label="选中品种组合日度收益率柱状图" />
+        </section>
+      </div>
+    </div>
   );
 }
 
