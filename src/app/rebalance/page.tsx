@@ -1,15 +1,11 @@
 import type { Metadata } from "next";
 
-import { RebalanceCalculator } from "@/components/rebalance-calculator";
-import { loadPortfolioDataset } from "@/lib/queries";
+import { CachedRebalanceCalculator } from "@/components/portfolio-data-cache";
 
 export const metadata: Metadata = {
   title: "调仓计算",
 };
 
-export const dynamic = "force-dynamic";
-
-export default async function RebalancePage() {
-  const dataset = await loadPortfolioDataset();
-  return <RebalanceCalculator dataset={dataset} />;
+export default function RebalancePage() {
+  return <CachedRebalanceCalculator />;
 }

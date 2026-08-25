@@ -1,20 +1,15 @@
 import type { Metadata } from "next";
 
-import { NavDashboard } from "@/components/nav-dashboard";
-import { loadNavHistory } from "@/lib/queries";
+import { CachedNavDashboard } from "@/components/portfolio-data-cache";
 
 export const metadata: Metadata = {
   title: "每日净值",
 };
 
-export const dynamic = "force-dynamic";
-
-export default async function NetValuePage() {
-  const rows = await loadNavHistory();
-
+export default function NetValuePage() {
   return (
     <div className="net-value-page">
-      <NavDashboard rows={rows} />
+      <CachedNavDashboard />
     </div>
   );
 }

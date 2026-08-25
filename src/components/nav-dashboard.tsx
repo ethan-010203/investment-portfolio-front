@@ -1,7 +1,7 @@
 "use client";
 
 import * as echarts from "echarts";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { EChart } from "@/components/echart";
 import { ASSETS, type AssetKey } from "@/lib/assets";
@@ -11,11 +11,35 @@ import { calculateMetrics } from "@/lib/metrics";
 import type { NavSeriesRecord } from "@/lib/types";
 
 const SELECTABLE_ASSETS = ASSETS.filter((asset) => asset.key !== "cash");
+const SELECTED_ASSETS_STORAGE_KEY = "investment-portfolio:net-value-assets:v1";
+
+function initialSelectedAssets(): AssetKey[] {
+  const defaults = SELECTABLE_ASSETS.map((asset) => asset.key);
+  if (typeof window === "undefined") return defaults;
+
+  try {
+    const parsed: unknown = JSON.parse(window.localStorage.getItem(SELECTED_ASSETS_STORAGE_KEY) ?? "null");
+    if (!Array.isArray(parsed)) return defaults;
+    const allowed = new Set<AssetKey>(defaults);
+    const selected = parsed.filter(
+      (key): key is AssetKey => typeof key === "string" && allowed.has(key as AssetKey),
+    );
+    return selected.length > 0 ? [...new Set(selected)] : defaults;
+  } catch {
+    return defaults;
+  }
+}
 
 export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
-  const [selectedAssets, setSelectedAssets] = useState<AssetKey[]>(() =>
-    SELECTABLE_ASSETS.map((asset) => asset.key),
-  );
+  const [selectedAssets, setSelectedAssets] = useState<AssetKey[]>(initialSelectedAssets);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(SELECTED_ASSETS_STORAGE_KEY, JSON.stringify(selectedAssets));
+    } catch {
+      // 浏览器禁用本地存储时仍保留当前页面内的选择。
+    }
+  }, [selectedAssets]);
 
   const seriesRows = rows;
 
