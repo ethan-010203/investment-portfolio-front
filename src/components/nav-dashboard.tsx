@@ -1,8 +1,7 @@
 "use client";
 
 import * as echarts from "echarts";
-import { ChevronDown, ListFilter } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { EChart } from "@/components/echart";
 import { ASSETS, type AssetKey } from "@/lib/assets";
@@ -17,8 +16,6 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
   const [selectedAssets, setSelectedAssets] = useState<AssetKey[]>(() =>
     SELECTABLE_ASSETS.map((asset) => asset.key),
   );
-  const [assetMenuOpen, setAssetMenuOpen] = useState(false);
-  const assetSelectorRef = useRef<HTMLDivElement>(null);
 
   const seriesRows = rows;
 
@@ -27,15 +24,6 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
     [seriesRows, selectedAssets],
   );
   const metrics = useMemo(() => calculateMetrics(selectedCurveRows), [selectedCurveRows]);
-  useEffect(() => {
-    function closeOnOutsideClick(event: MouseEvent) {
-      if (assetSelectorRef.current && !assetSelectorRef.current.contains(event.target as Node)) {
-        setAssetMenuOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", closeOnOutsideClick);
-    return () => document.removeEventListener("mousedown", closeOnOutsideClick);
-  }, []);
 
   const lineChartOption = useMemo<echarts.EChartsCoreOption>(
     () => ({
@@ -245,46 +233,24 @@ export function NavDashboard({ rows }: { rows: NavSeriesRecord[] }) {
         <div className="net-value-sidebar-controls">
           <div className="net-value-control">
             <span className="net-value-control-label">品种</span>
-            <div ref={assetSelectorRef} className="asset-selector">
-              <button
-                type="button"
-                className="asset-selector-trigger"
-                aria-expanded={assetMenuOpen}
-                aria-haspopup="true"
-                onClick={() => setAssetMenuOpen((open) => !open)}
-              >
-                <span className="asset-selector-trigger-main">
-                  <ListFilter size={16} strokeWidth={2.2} />
-                  <span>选择品种</span>
-                  <span className="asset-count">{selectedAssets.length}/{SELECTABLE_ASSETS.length}</span>
-                </span>
-                <ChevronDown size={15} className={assetMenuOpen ? "rotate-180 transition-transform" : "transition-transform"} />
-              </button>
-              {assetMenuOpen && (
-                <div className="asset-selector-menu" role="menu" aria-label="选择净值品种">
-                  <div className="asset-menu-heading">选择组合品种</div>
-                  {SELECTABLE_ASSETS.map((asset) => {
-                    const checked = selectedAssets.includes(asset.key);
-                    const latestWeight = seriesRows.at(-1)?.weights[asset.key] ?? 0;
-                    return (
-                      <label key={asset.key} className="asset-option" role="menuitemcheckbox" aria-checked={checked}>
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          disabled={checked && selectedAssets.length === 1}
-                          onChange={() => toggleAsset(asset.key)}
-                        />
-                        <span className="asset-dot" style={{ backgroundColor: asset.color }} />
-                        <span className="asset-option-label">{asset.label}</span>
-                        <span className="asset-option-weight">{formatPercent(latestWeight, 1)}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              )}
+            <div className="asset-options-list" aria-label="选择净值品种">
+              {SELECTABLE_ASSETS.map((asset) => {
+                const checked = selectedAssets.includes(asset.key);
+                return (
+                  <label key={asset.key} className="asset-option">
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      disabled={checked && selectedAssets.length === 1}
+                      onChange={() => toggleAsset(asset.key)}
+                    />
+                    <span className="asset-dot" style={{ backgroundColor: asset.color }} />
+                    <span className="asset-option-label">{asset.label}</span>
+                  </label>
+                );
+              })}
             </div>
           </div>
-
         </div>
       </aside>
 

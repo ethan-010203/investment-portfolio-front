@@ -117,15 +117,19 @@ select:focus-visible {
   box-shadow: none;
 }
 
+.net-value-sidebar .metric-card .text-xs {
+  font-size: 12px;
+}
+
 .net-value-sidebar .metric-card .mt-2 {
   margin-top: 6px;
-  font-size: 1.15rem;
+  font-size: 1.35rem;
 }
 
 .metric-detail {
   margin-top: 3px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.2;
   white-space: nowrap;
 }
@@ -155,78 +159,28 @@ select:focus-visible {
 
 .net-value-control-label {
   color: var(--muted);
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.asset-selector {
-  position: relative;
-}
-
-.asset-selector-trigger {
-  display: flex;
-  width: 100%;
-  min-height: 42px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  border-radius: 15px;
-  background: #eef0ed;
-  padding: 0 12px;
-  color: var(--foreground);
   font-size: 13px;
-  font-weight: 650;
-  transition: background 160ms ease, box-shadow 160ms ease;
+  font-weight: 700;
 }
 
-.asset-selector-trigger:hover {
-  background: #e4ebe8;
-  box-shadow: 0 5px 14px rgb(61 65 61 / 8%);
-}
-
-.asset-selector-trigger-main {
-  display: inline-flex;
-  align-items: center;
+.asset-options-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
-}
-
-.asset-count {
-  border-radius: 999px;
-  background: rgb(255 255 255 / 70%);
-  padding: 3px 7px;
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.asset-selector-menu {
-  position: absolute;
-  z-index: 30;
-  top: calc(100% + 8px);
-  left: 0;
   width: 100%;
-  border-radius: 21px;
-  background: var(--surface-strong);
-  padding: 9px;
-  box-shadow: var(--shadow-hover);
-}
-
-.asset-menu-heading {
-  padding: 7px 9px 8px;
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 700;
 }
 
 .asset-option {
   display: flex;
-  min-height: 37px;
+  min-width: 0;
+  min-height: 44px;
   align-items: center;
   gap: 8px;
   border-radius: 13px;
-  padding: 0 8px;
+  padding: 0 10px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 14px;
+  transition: background 160ms ease;
 }
 
 .asset-option:hover {
@@ -234,22 +188,19 @@ select:focus-visible {
 }
 
 .asset-option input {
-  width: 15px;
-  height: 15px;
+  width: 17px;
+  height: 17px;
   margin: 0;
   accent-color: var(--blue-deep);
 }
 
 .asset-option-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   flex: 1;
   font-weight: 600;
-}
-
-.asset-option-weight {
-  color: var(--muted);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 10px;
-  font-variant-numeric: tabular-nums;
 }
 
 .net-value-charts {
