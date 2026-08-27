@@ -30,19 +30,6 @@ export function allocateCapital(capital: number, weights: WeightMap): Allocation
   }));
 }
 
-export function allocateCapitalInputs(
-  capital: number,
-  weights: WeightMap,
-): Record<AssetKey, string> {
-  return allocateCapital(capital, weights).reduce(
-    (values, row) => {
-      values[row.key] = row.amount.toFixed(2);
-      return values;
-    },
-    {} as Record<AssetKey, string>,
-  );
-}
-
 export function formatRebalanceAction(
   assetKey: AssetKey,
   difference: number,

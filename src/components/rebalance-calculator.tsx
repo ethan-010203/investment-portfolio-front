@@ -8,18 +8,13 @@ import { EChart } from "@/components/echart";
 import { SegmentedControl } from "@/components/segmented-control";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import {
-  allocateCapital,
-  allocateCapitalInputs,
-  formatRebalanceAction,
-  normalizeCapital,
-} from "@/lib/allocation";
+import { allocateCapital, formatRebalanceAction, normalizeCapital } from "@/lib/allocation";
 import { ASSETS, ASSET_BY_KEY, type AssetKey } from "@/lib/assets";
 import {
   compareEventTriggersDescending,
   triggeredEventsThrough,
 } from "@/lib/event-display";
-import { formatDate, formatPercent } from "@/lib/format";
+import { formatCurrency, formatDate, formatPercent } from "@/lib/format";
 import type { PortfolioDataset, RebalanceEventSummary } from "@/lib/types";
 
 type Mode = "current" | "history";
@@ -93,7 +88,6 @@ function parseHoldingInputs(value: string): Record<AssetKey, string> | null {
 export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) {
   const [mode, setMode] = useState<Mode>("current");
   const [holdingInputs, setHoldingInputs] = useState<Record<AssetKey, string>>(emptyHoldingInputs);
-  const [totalCapitalDraft, setTotalCapitalDraft] = useState<string | null>(null);
   const [rulesOpen, setRulesOpen] = useState(false);
   const holdingsCacheReady = useRef(false);
   const isMobile = useMediaQuery("(max-width: 720px)");
@@ -146,13 +140,6 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
   const totalCapital = useMemo(
     () => ASSETS.reduce((total, asset) => total + holdingAmounts[asset.key], 0),
     [holdingAmounts],
-  );
-  const hasHoldingInput = useMemo(
-    () => ASSETS.some((asset) => holdingInputs[asset.key].trim().length > 0),
-    [holdingInputs],
-  );
-  const totalCapitalInput = totalCapitalDraft ?? (
-    hasHoldingInput ? totalCapital.toFixed(2) : ""
   );
   const strategyRows = useMemo(
     () => ASSETS.map((asset) => ({ key: asset.key, weight: snapshot.weights[asset.key] })),
@@ -244,19 +231,6 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
     setHoldingInputs((current) => ({ ...current, [key]: value }));
   }
 
-  function updateTotalCapital(value: string) {
-    setTotalCapitalDraft(value);
-    const normalized = value.replaceAll(",", "").trim();
-    if (!normalized) {
-      setHoldingInputs(emptyHoldingInputs());
-      return;
-    }
-
-    const capital = Number(normalized);
-    if (!Number.isFinite(capital) || capital < 0) return;
-    setHoldingInputs(allocateCapitalInputs(capital, snapshot.weights));
-  }
-
   return (
     <div className="rebalance-page">
       <div className="rebalance-workspace">
@@ -267,9 +241,7 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
             <RebalanceModeBar
               mode={mode}
               onModeChange={setMode}
-              totalCapitalInput={totalCapitalInput}
-              onTotalCapitalChange={updateTotalCapital}
-              onTotalCapitalBlur={() => setTotalCapitalDraft(null)}
+              totalCapital={totalCapital}
             />
             <div className="rebalance-table-scroll overflow-x-auto">
               <table className="rebalance-calculation-table w-full min-w-[720px] border-collapse">
@@ -469,39 +441,21 @@ export function RebalanceCalculator({ dataset }: { dataset: PortfolioDataset }) 
 function RebalanceModeBar({
   mode,
   onModeChange,
-  totalCapitalInput,
-  onTotalCapitalChange,
-  onTotalCapitalBlur,
+  totalCapital,
 }: {
   mode: Mode;
   onModeChange: (value: Mode) => void;
-  totalCapitalInput?: string;
-  onTotalCapitalChange?: (value: string) => void;
-  onTotalCapitalBlur?: () => void;
+  totalCapital?: number;
 }) {
   return (
     <div className="rebalance-mode-bar">
       <SegmentedControl value={mode} options={MODE_OPTIONS} onChange={onModeChange} label="调仓周期" />
-      {totalCapitalInput !== undefined && onTotalCapitalChange && (
+      {totalCapital !== undefined && (
         <div className="rebalance-mode-actions">
-          <label className="rebalance-total">
+          <div className="rebalance-total">
             <span>总资金</span>
-            <span className="rebalance-total-field">
-              <span className="rebalance-total-currency" aria-hidden="true">¥</span>
-              <input
-                type="text"
-                value={totalCapitalInput}
-                onChange={(event) => onTotalCapitalChange(event.target.value)}
-                onBlur={onTotalCapitalBlur}
-                onFocus={(event) => event.currentTarget.select()}
-                inputMode="decimal"
-                autoComplete="off"
-                placeholder="0"
-                className="rebalance-total-input"
-                aria-label="总资金"
-              />
-            </span>
-          </label>
+            <strong>{formatCurrency(totalCapital)}</strong>
+          </div>
         </div>
       )}
     </div>
