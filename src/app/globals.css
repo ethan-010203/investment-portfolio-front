@@ -976,7 +976,7 @@ header nav a:not([aria-current="page"]) {
 
 .rebalance-total {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 10px;
   color: var(--muted);
   font-size: 12px;
@@ -990,11 +990,49 @@ header nav a:not([aria-current="page"]) {
   gap: 14px;
 }
 
-.rebalance-total strong {
+.rebalance-total-field {
+  position: relative;
+  display: block;
+  width: 158px;
+}
+
+.rebalance-total-currency {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  z-index: 1;
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.rebalance-total-input {
+  width: 100%;
+  height: 38px;
+  border: 0;
+  border-radius: 13px;
+  background: #f0f1ed;
+  padding: 0 12px 0 30px;
   color: var(--foreground);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 18px;
+  font-size: 16px;
+  font-weight: 650;
   font-variant-numeric: tabular-nums;
+  text-align: right;
+  box-shadow: inset 0 1px 1px rgb(61 65 61 / 4%);
+  transition: background 160ms ease, box-shadow 160ms ease;
+}
+
+.rebalance-total-input::placeholder {
+  color: #a3a7a1;
+}
+
+.rebalance-total-input:focus {
+  background: #edf5f7;
+  box-shadow: inset 0 0 0 3px rgb(47 98 136 / 16%);
+  outline: 0;
 }
 
 .holding-amount-input {
@@ -1610,27 +1648,25 @@ header nav a:not([aria-current="page"]) {
   }
 
   .rebalance-mode-actions {
-    display: grid;
+    display: block;
     width: 100%;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 10px;
   }
 
   .rebalance-total {
-    min-width: 0;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
-    white-space: normal;
+    display: grid;
+    width: 100%;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
   }
 
-  .rebalance-total strong {
-    max-width: 100%;
-    overflow: hidden;
+  .rebalance-total-field {
+    width: 100%;
+  }
+
+  .rebalance-total-input {
+    height: 42px;
     font-size: 17px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 
   .rebalance-table-scroll {
