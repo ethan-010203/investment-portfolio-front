@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { allocateCapital, formatRebalanceAction, normalizeCapital } from "@/lib/allocation";
+import {
+  allocateCapital,
+  allocateCapitalInputs,
+  formatRebalanceAction,
+  normalizeCapital,
+} from "@/lib/allocation";
 import type { WeightMap } from "@/lib/types";
 
 const weights: WeightMap = {
@@ -21,6 +26,20 @@ describe("本金分配", () => {
   it("所有资产金额与本金严格一致", () => {
     const rows = allocateCapital(123_456.78, weights);
     expect(rows.reduce((sum, row) => sum + row.amount, 0)).toBeCloseTo(123_456.78, 2);
+  });
+
+  it("总资金输入可以直接生成全部持仓输入值", () => {
+    const inputs = allocateCapitalInputs(10_000, weights);
+
+    expect(inputs).toEqual({
+      dividend: "500.00",
+      sp500: "200.00",
+      nasdaq: "100.00",
+      policyBankBond: "5600.00",
+      gold: "1000.00",
+      soymeal: "800.00",
+      cash: "1800.00",
+    });
   });
 
   it("拒绝权重合计错误", () => {

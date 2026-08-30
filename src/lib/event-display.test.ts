@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   compareEventTriggersDescending,
+  eventReasonForDisplay,
   triggeredEventsThrough,
 } from "@/lib/event-display";
 import type { RebalanceEventSummary } from "@/lib/types";
@@ -41,5 +42,20 @@ describe("调仓事件展示日期", () => {
   it("本期事件和往期事件都按触发日期倒序排列", () => {
     expect([...events].sort(compareEventTriggersDescending).map((item) => item.id))
       .toEqual(["stop", "formal"]);
+  });
+});
+
+describe("调仓事件展示说明", () => {
+  it("隐藏单品种止盈的内部判断细节", () => {
+    const takeProfitEvent = event("take-profit", "2026-08-25", "2026-08-26", 2, "单品种止盈");
+    takeProfitEvent.reason = "累计盈利达到启动阈值；峰值回撤达到止盈阈值；收盘价跌破十日均线";
+
+    expect(eventReasonForDisplay(takeProfitEvent)).toBe("已触发策略止盈信号");
+  });
+
+  it("保留其他事件原有说明", () => {
+    const stopEvent = event("stop", "2026-08-25", "2026-08-26", 2, "组合止损");
+
+    expect(eventReasonForDisplay(stopEvent)).toBe("测试事件");
   });
 });

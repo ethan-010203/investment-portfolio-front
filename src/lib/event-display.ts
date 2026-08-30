@@ -7,6 +7,13 @@ const EVENT_TYPE_ORDER: Record<RebalanceEventSummary["type"], number> = {
 };
 
 /**
+ * 止盈事件只展示结果，不向前端用户披露内部信号和阈值细节。
+ */
+export function eventReasonForDisplay(event: RebalanceEventSummary): string {
+  return event.type === "单品种止盈" ? "已触发策略止盈信号" : event.reason;
+}
+
+/**
  * 事件在信号日收盘确认后即可展示，不能等到下一交易日实际执行时才出现。
  */
 export function triggeredEventsThrough(
