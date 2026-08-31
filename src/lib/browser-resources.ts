@@ -51,7 +51,8 @@ function isPortfolioDataset(value: unknown): value is PortfolioDataset {
     && ["正式调仓", "组合止损", "单品种止盈"].includes(String(event.type))
     && typeof event.cycleDate === "string"
     && typeof event.signalDate === "string"
-    && typeof event.executionDate === "string"
+    && (event.executionDate === null || typeof event.executionDate === "string")
+    && ["待执行", "已执行"].includes(String(event.status))
     && isFiniteNumber(event.sequence)
     && typeof event.asset === "string"
     && typeof event.reason === "string"

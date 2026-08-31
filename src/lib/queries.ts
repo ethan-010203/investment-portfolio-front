@@ -17,6 +17,13 @@ function text(row: Record<string, unknown>, key: string): string {
   return value;
 }
 
+function nullableText(row: Record<string, unknown>, key: string): string | null {
+  const value = row[key];
+  if (value === null || value === undefined) return null;
+  if (typeof value !== "string" || !value) throw new Error(`数据字段无效：${key}`);
+  return value;
+}
+
 function number(row: Record<string, unknown>, key: string): number {
   const value = Number(row[key]);
   if (!Number.isFinite(value)) throw new Error(`数值字段无效：${key}`);
@@ -95,13 +102,18 @@ function parseEventSummary(row: Record<string, unknown>): RebalanceEventSummary 
   if (!["正式调仓", "组合止损", "单品种止盈"].includes(type)) {
     throw new Error(`未知调仓事件：${type}`);
   }
+  const status = text(row, "event_status");
+  if (!["待执行", "已执行"].includes(status)) {
+    throw new Error(`未知调仓事件状态：${status}`);
+  }
   return {
     id: text(row, "event_id"),
     strategyVersion: text(row, "strategy_version"),
     type: type as RebalanceEventSummary["type"],
     cycleDate: text(row, "cycle_date"),
     signalDate: text(row, "signal_date"),
-    executionDate: text(row, "execution_date"),
+    executionDate: nullableText(row, "execution_date"),
+    status: status as RebalanceEventSummary["status"],
     sequence: number(row, "sequence"),
     asset: text(row, "asset"),
     reason: text(row, "reason"),
@@ -145,13 +157,13 @@ const NAV_SELECT = `
     "政金债收益率" AS policy_bond_return,
     "黄金收益率" AS gold_return,
     "豆粕收益率" AS soymeal_return,
-    "红利最终权重" AS dividend_weight,
-    "标普最终权重" AS sp500_weight,
-    "纳指最终权重" AS nasdaq_weight,
-    "政金债最终权重" AS policy_bond_weight,
-    "黄金最终权重" AS gold_weight,
-    "豆粕最终权重" AS soymeal_weight,
-    "现金最终权重" AS cash_weight,
+    "红利当日目标权重" AS dividend_weight,
+    "标普当日目标权重" AS sp500_weight,
+    "纳指当日目标权重" AS nasdaq_weight,
+    "政金债当日目标权重" AS policy_bond_weight,
+    "黄金当日目标权重" AS gold_weight,
+    "豆粕当日目标权重" AS soymeal_weight,
+    "现金当日目标权重" AS cash_weight,
     "组合毛收益率" AS gross_return,
     "交易成本率" AS cost_rate,
     "组合净收益率" AS net_return,
@@ -196,6 +208,7 @@ const NAV_SNAPSHOT_SQL = `${NAV_SELECT}
         SELECT "执行日期"
         FROM "策略调仓事件"
         WHERE "策略版本" = ?
+          AND "事件状态" = '已执行'
       )
     )
   ORDER BY "日期"`;
@@ -208,13 +221,14 @@ const EVENT_SUMMARY_SQL = `
     "所属正式调仓日" AS cycle_date,
     "信号日期" AS signal_date,
     "执行日期" AS execution_date,
+    "事件状态" AS event_status,
     "执行顺序" AS sequence,
     "事件资产" AS asset,
     "触发原因" AS reason,
     "调整明细" AS adjustments
   FROM "策略调仓事件"
   WHERE "策略版本" = ?
-  ORDER BY "执行日期", "执行顺序"`;
+  ORDER BY "信号日期", "执行顺序"`;
 
 export async function loadNavHistory(): Promise<NavSeriesRecord[]> {
   const version = await latestStrategyVersion();

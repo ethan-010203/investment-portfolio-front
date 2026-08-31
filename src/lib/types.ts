@@ -35,7 +35,8 @@ export type RebalanceEventSummary = {
   type: "正式调仓" | "组合止损" | "单品种止盈";
   cycleDate: string;
   signalDate: string;
-  executionDate: string;
+  executionDate: string | null;
+  status: "待执行" | "已执行";
   sequence: number;
   asset: string;
   reason: string;
